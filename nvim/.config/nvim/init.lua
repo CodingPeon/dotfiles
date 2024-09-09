@@ -49,3 +49,5 @@ vim.o.incsearch=true -- Search as you type
 require("config.lazy")
 require("config.nvim-tree")
 require("config.gitsigns")
+require("config.telescope")
+require("config.which-key")

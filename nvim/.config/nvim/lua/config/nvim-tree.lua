@@ -5,8 +5,9 @@ vim.cmd([[
   nnoremap - :NvimTreeToggle<CR>
 ]])
 
-local keymap = vim.keymap -- for conciseness
-keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>") -- toggle file explorer
+-- Use which-key to do all bindings instead
+-- local keymap = vim.keymap -- for conciseness
+-- keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>") -- toggle file explorer
 
 -- vim.opt.foldmethod = "expr"
 -- vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
