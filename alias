@@ -3,7 +3,8 @@ alias vif='selected_file=$(fzf); [ -n "$selected_file" ] && vi "$selected_file"'
      
 # Search and replace
 search_and_replace() {    
-    find . -name "$1" -type f -exec sed -i "s/${2}/${3}/g" {} \;    
+    find ./ -type f -exec sed -i "s/${1}/${2}/g" {} \;    
+    # find . -name "$1" -type f -exec sed -i "s/${2}/${3}/g" {} \;    
 }    
      
 search_and_replace_single() {    
