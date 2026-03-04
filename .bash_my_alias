@@ -1,0 +1,18 @@
+# FZF stuff    
+alias vif='selected_file=$(fzf); [ -n "$selected_file" ] && vi "$selected_file"'    
+     
+# Search and replace
+search_and_replace() {    
+    find ./ -type f -exec sed -i "s/${1}/${2}/g" {} \;    
+    # find . -name "$1" -type f -exec sed -i "s/${2}/${3}/g" {} \;    
+}    
+     
+search_and_replace_single() {    
+    sed -i "s/${2}/${3}/g" $1    
+}    
+
+
+# Git
+alias git_prune_merged="git branch --merged >/tmp/merged-branches && vi /tmp/merged-branches && xargs git branch -d </tmp/merged-branches"
+
+alias cdg='cd $(git rev-parse --show-toplevel)'
