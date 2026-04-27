@@ -1,0 +1,7 @@
+---
+description: Extra rules setup by users
+globs: 
+alwaysApply: true
+---
+- Explanation must be concise. Each point or concept is limited to 3 sentences.
+- Use point from if the explaination requires more than 3 sentences.
