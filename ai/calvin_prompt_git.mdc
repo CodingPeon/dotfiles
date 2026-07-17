@@ -1,0 +1,103 @@
+---
+description: Git commit message rules based on Conventional Commits 1.0.0
+globs:
+alwaysApply: true
+---
+
+# Git Commit Messages
+
+Follow Conventional Commits 1.0.0 when drafting, reviewing, or creating commit messages.
+Source: https://www.conventionalcommits.org/en/v1.0.0/
+
+## Format
+
+Use this structure:
+
+```text
+<type>[optional scope][optional !]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+Rules:
+- Prefix every commit with a type, followed by an optional scope, optional `!`, then `: `.
+- Use a short, imperative description immediately after `: `.
+- Add a body only when useful; start it after one blank line.
+- Add footers only after a blank line following the body or description.
+
+## Types
+
+Use the type that best describes the intent:
+- `feat`: adds a new feature.
+- `fix`: fixes a bug.
+- `docs`: documentation-only change.
+- `style`: formatting or style-only change without behavior impact.
+- `refactor`: code change that is neither a feature nor a bug fix.
+- `perf`: performance improvement.
+- `test`: adds or updates tests.
+- `build`: build system or dependency change.
+- `ci`: CI configuration or pipeline change.
+- `chore`: maintenance work that does not fit another type.
+- `revert`: reverts previous commits.
+
+Prefer one purpose per commit. If a change needs multiple unrelated types, suggest splitting it into multiple commits.
+
+## Scope
+
+Use an optional noun scope when it clarifies the affected area:
+
+```text
+fix(parser): handle arrays with multiple spaces
+feat(api): add shipment notification
+```
+
+Keep scope lowercase and concise unless the repository convention says otherwise.
+
+## Breaking Changes
+
+Mark breaking API or behavior changes in one of these ways:
+- Add `!` before the colon, for example `feat(api)!: remove legacy endpoint`.
+- Add a footer starting with uppercase `BREAKING CHANGE:`.
+
+Breaking changes can use any type. Commits with `BREAKING CHANGE` or `!` imply a major version impact.
+
+## Footers
+
+Footers should follow git trailer style:
+
+```text
+Reviewed-by: Name
+Refs: AC-1234
+BREAKING CHANGE: configuration now uses the new schema
+```
+
+Footer tokens use hyphens instead of spaces, except `BREAKING CHANGE`, which is allowed. `BREAKING-CHANGE` is equivalent to `BREAKING CHANGE`.
+
+## SemVer Meaning
+
+Use these meanings when reasoning about release impact:
+- `fix` maps to a patch release.
+- `feat` maps to a minor release.
+- Any breaking change maps to a major release.
+
+Other types have no required SemVer impact unless they include a breaking change.
+
+## Examples
+
+```text
+docs: correct spelling of changelog
+
+feat(lang): add Polish language
+
+fix: prevent racing of requests
+
+Introduce a request id and ignore responses that do not match the latest request.
+
+Refs: AC-1234
+
+feat!: drop support for Node 6
+
+BREAKING CHANGE: JavaScript features now require Node 18 or newer.
+```

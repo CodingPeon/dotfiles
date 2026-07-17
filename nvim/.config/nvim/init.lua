@@ -1,3 +1,8 @@
+-- Skip full Neovim config in Cursor/VS Code embed mode
+if vim.g.vscode then
+  return
+end
+
 -- remap leader key to space
 vim.g.mapleader = " "
 -- optionally enable 24-bit colour
