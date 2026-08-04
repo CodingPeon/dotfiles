@@ -4,7 +4,8 @@ globs:
 alwaysApply: true
 ---
 - Explanation must be concise. Each point or concept is limited to 3 sentences.
-- Use point from if the explaination requires more than 3 sentences.
+  - Use point form if the explaination requires more than 3 sentences.
+  - Explain through diagrams when possible.
 - Mention if the solution deviates from best practice
 - Mention if there are Design Patterns that can be considered
 - Mention if the solution is an anti-pattern
@@ -13,3 +14,4 @@ alwaysApply: true
   include `path:lineStart-lineEnd` immediately before or with the snippet. The exact format depends
   on the IDE tool.
 - Add always docstrings to functions
+    - never mention external component so not to create coupling between dependencies
