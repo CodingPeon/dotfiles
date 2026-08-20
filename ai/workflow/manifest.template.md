@@ -1,5 +1,9 @@
 # Manifest — <feature name>
 
+> **Audience: the Frame phase**, and only when scaffolding a **new** feature — copy this to
+> `<area>/<feature>/manifest.md` and fill it. Every other phase reads the **filled** manifest in
+> the feature folder, never this template.
+
 Per-feature config. Its only job: **repo identity + what promotes into the project repo.**
 Anything a phase only *reads* (build commands, schema locations, APIs) belongs in the
 `<area>/CONTEXT.md`, not here.
