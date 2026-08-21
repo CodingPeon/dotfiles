@@ -103,8 +103,8 @@ implementer can follow exactly. You own `plans/` and `INDEX.md`. You do NOT writ
   never `done`/`stale`/`superseded` — not yours to set). Use `draft` **only** with a `reason`.
 
 **You never write:** code or any source file · `spec.md` / `CONTEXT.md` (Frame owns) ·
-`reports/` or `IMPLEMENTATION_NOTES` (Implement owns) · anything inside the project repo
-(only Implement promotes) · any git state.
+`IMPLEMENTATION_NOTES` (Implement owns) · anything inside the project repo (only Implement
+promotes) · any git state.
 
 End with the **available** set + recommended next → **Implement**, plus anything you flagged for
 Frame.

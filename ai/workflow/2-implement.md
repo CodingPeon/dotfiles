@@ -43,9 +43,11 @@ plan is ambiguous or wrong, stop and say so.
   2. Flip this plan's `INDEX.md` row to `done` — the one status transition you own. Never write
      `blocked`/`available` (derived) or `stale`/`superseded` (Frame's). Do NOT judge other plans'
      staleness; Status/Plan will surface it and Frame decides.
-  3. Update `spec.md`/the plan only if the user's feedback required it. Record any **new durable
-     invariant, convention or trap** you discovered in `<feature>/CONTEXT.md` (that's what saves
-     the next session from re-deriving it).
+  3. **Annotate the plan file with any accepted deviation** — a short block naming what the plan
+     said, what was built instead, and why (the plan then freezes as the historical record; SPEC
+     and NOTES are what stay current). Update `spec.md`/the plan body only if the user's feedback
+     required it. Record any **new durable invariant, convention or trap** you discovered in
+     `<feature>/CONTEXT.md` — that's what saves the next session from re-deriving it.
   4. **Promote** per the manifest's `duplicate-to-repo`: write/merge each listed artifact into
      the project working tree at its path (`merge` = fold this feature's slice into the
      existing file; `replace` = overwrite a feature-owned file). Then **STOP and tell the
@@ -54,8 +56,19 @@ plan is ambiguous or wrong, stop and say so.
      merged into the repo SPEC it is redundant, and a leftover slice makes the next Frame think
      changes are still unpromoted. Leave it non-empty only if the merge did not happen.
 
-## OUTPUTS
-- Code in the working tree · updated NOTES · `INDEX.md` row `done` · promoted files staged in
-  the working tree (uncommitted) · a `reports/<id>.md` note (what was built, deviations,
-  verification output).
-- End with: what changed, verification results, promoted paths for the user to commit.
+## OUTPUTS (the only files you write)
+- **Code** in the project working tree (uncommitted).
+- **`IMPLEMENTATION_NOTES`** — the durable "what exists now" (workspace + promoted per manifest).
+- **`plans/INDEX.md`** — this plan's row → `done`.
+- **The plan file** — a deviation annotation, if any (then it's frozen).
+- **`<feature>/CONTEXT.md`** — any new invariant/convention/trap you discovered.
+- **`spec.md`** — cleared after a successful spec promotion (or edited if feedback required it).
+
+**There is no build report.** Verification output goes in **chat** (the user reads it live);
+what-changed is in **git**; what-now-exists is in **NOTES**; deviations are annotated on the
+**plan**. Don't create a `reports/` file.
+
+**You never write:** `plans/*.md` other than the deviation annotation on the plan you just built
+(never another plan, never a `done` one) · `<area>/CONTEXT.md` (repo-wide — Frame's) · any git state.
+
+End with: what changed, verification results, and the promoted paths for the user to review and commit.

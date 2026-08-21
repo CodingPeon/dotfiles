@@ -19,9 +19,10 @@ for the three doing-phases; **`status` is unprefixed — it's an anytime utility
 ## The loop
 
 ```
-FRAME      (Opus)    problem + context  → SPEC/CONTEXT (drafts, workspace)
+FRAME      (Opus)    problem + context  → spec.md slice + CONTEXT (workspace drafts)
 PLAN       (Opus)    docs + INDEX       → plans/*.md + INDEX rows
-IMPLEMENT  (Sonnet)  one plan + CONTEXT → code + verify + update docs + promote per manifest
+IMPLEMENT  (Sonnet)  one plan + CONTEXT → code + verify → IMPLEMENTATION_NOTES + INDEX `done`,
+                                          then promote SPEC/NOTES into the repo working tree
 
 STATUS     (cheap, anytime)  read INDEX → available / blocked / stale + recommend next
 ```
@@ -41,7 +42,23 @@ which fixes the code and updates the docs. There is no separate review/reconcile
   - Implementation bugs are always handled in **Implement**.
 - **Status** is not in this chain — drag it in any time to see what's available.
 
-## Artifacts (durable, versioned in the dotfiles repo — NOT the project repo)
+## Artifacts
+
+Artifacts live in **two homes**, and knowing which is which is the core of the design.
+
+| artifact | home | written by | read by |
+|---|---|---|---|
+| `<area>/CONTEXT.md` | workspace | Frame | all phases |
+| `<feature>/CONTEXT.md` | workspace | Frame; Implement appends discovered invariants | all phases |
+| `manifest.md` | workspace | Frame | Frame, Plan, Implement |
+| `spec.md` (pending slice) | workspace | Frame; **cleared** by Implement after promotion | Frame, Plan |
+| `plans/<id>-<name>.md` | workspace | Plan; Implement annotates deviations, then frozen | Implement |
+| `plans/INDEX.md` | workspace | Frame (`stale`/`superseded`), Plan (`draft`/`ready`), Implement (`done`) | all phases |
+| **`SPEC.md`** — the WHAT | **project repo** | Implement, by promoting the slice (`merge`) | Frame, Plan |
+| **`IMPLEMENTATION_NOTES.md`** — what's built | **project repo** | Implement, on close (`merge`) | Frame, Plan |
+| design diagrams (drawio/png) | **project repo** | you (human) | Frame |
+
+### 1. Workspace (ephemeral, versioned in the dotfiles repo — NOT the project repo)
 
 ```
 ~/agile_dotfiles/ai/workflow_artifacts/
@@ -54,8 +71,11 @@ which fixes the code and updates the docs. There is no separate review/reconcile
          plans/
             INDEX.md               # the plan registry
             <id>-<name>.md         # one plan = one implementable unit
-         reports/                  # implement run notes
 ```
+
+There is **no build report**: acceptance is implicit, so what-now-exists lives in NOTES,
+what-changed in git, verification output in chat, and accepted deviations are annotated onto the
+plan file at close (which then freezes as the historical record).
 
 **Context cascades.** Every phase reads `<area>/CONTEXT.md` **then** `<feature>/CONTEXT.md`;
 the feature file wins on conflict (same cascade as nested `CLAUDE.md`).
@@ -69,6 +89,25 @@ the feature file wins on conflict (same cascade as nested `CLAUDE.md`).
 Keeping these OUT of the project repo is the point: half-baked drafts never pollute it.
 Only **promotion** (Implement, per the manifest) writes accepted content into the project
 working tree.
+
+### 2. Canonical (in the project repo, committed by you)
+
+These already exist in a mature repo and **accumulate across every feature** — they are the
+project's real documentation, not workflow scaffolding:
+
+- **`SPEC.md`** — the normative WHAT for the whole extension/component. Frame drafts changes into
+  the workspace `spec.md` slice; Implement **merges** that slice in on close. Living: sections get
+  revised and removed, not just appended.
+- **`IMPLEMENTATION_NOTES.md`** — what is actually built, and the decisions/deviations behind it.
+  Implement **merges** its entry in on close. This is the file a *fresh* planner trusts to know
+  what already exists, so an accept that skips it is the workflow's main failure mode.
+- **Design diagrams** (drawio/png) — your source material, alongside those docs. Read-only to
+  every phase; they get distilled into SPEC/CONTEXT, never rewritten.
+
+Both docs are named by the feature `manifest.md`'s `duplicate-to-repo` paths, so phases never
+guess filenames — and both arrive as an **uncommitted working-tree diff** for you to review and
+commit. Nothing here is workflow-specific: point the manifest at whatever docs a repo already has
+(or at nothing, and the whole loop stays ephemeral).
 
 ## Invariants every phase obeys
 

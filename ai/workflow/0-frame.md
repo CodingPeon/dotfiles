@@ -76,9 +76,10 @@ You do NOT plan implementation steps and you do NOT write code.
 - `manifest.md` — new features (full), or filling an empty/placeholder `repo-remote`.
 - `plans/INDEX.md` — ripple flags (`stale`/`superseded`) **only** if the check fired.
 
-**You never write:** code · `plans/*.md` (Plan owns) · `reports/` (Implement owns) ·
-`IMPLEMENTATION_NOTES` (Implement owns; read-only here) · anything inside the project repo
-(only Implement promotes) · any git state.
+**You never write:** code · `plans/*.md` (Plan owns) · `IMPLEMENTATION_NOTES` (Implement owns;
+read-only here) · anything inside the project repo (only Implement promotes) · any git state.
+Exception, and only via the ripple check: the **`stale`/`superseded` status + reason** on an
+`INDEX.md` row.
 
 End by telling the user the agreed WHAT is captured, what (if anything) you flagged, and whether
 to go to **Plan** next.
