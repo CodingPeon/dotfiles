@@ -56,11 +56,14 @@ confirmed. Enumerate to *ask*; never consume to *assume*.
   - **But you CLEAR `stale` yourself** — rewriting the plan *is* the resolution, so no Frame
     round-trip is needed: rewrite it and set its row to `ready` (or `draft` + `reason` if the
     revision is still unresolved). Dropping the plan instead? Delete the row and the file.
-  - **Never touch `superseded`.** It sits on a `done` plan and is **permanent history**; its
-    resolution is a **new** plan with its own row, never a status change on the old one.
-- **Derived, never stored:** `available` = `ready` + all `deps` `done` + not `stale`;
-  `blocked` = `ready` + some dep not `done`. **Compute at report time** — a stored value lies the
-  moment a dependency completes, and nothing un-blocks dependents.
+  - **Never touch `superseded`.** It *replaces* `done`, recording work that was built and then
+    invalidated — **permanent history**. Its resolution is a **new** plan with its own row, never a
+    status change back on the old one.
+- **Statuses are mutually exclusive — a row holds exactly one.** `stale` *replaces* `ready`;
+  `superseded` *replaces* `done`.
+- **Derived, never stored:** `available` = `ready` + all `deps` `done`; `blocked` = `ready` + some
+  dep not `done`. (No "not stale" test — a stale row isn't `ready`.) **Compute at report time** —
+  a stored value lies the moment a dependency completes, and nothing un-blocks dependents.
 - **Frontmatter carries identity only:** `id`, `group`, `title`, `covers`, `deps`. **No `status`,
   no `reason`** — that removes the two-writer conflict and any need to reconcile.
 - **`reason`** is an INDEX column, required whenever status is `draft`/`stale`/`superseded`.

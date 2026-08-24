@@ -31,12 +31,17 @@ to reconcile and no two-writer conflict.
 | `ready` | cleared for Implement | Plan |
 | `done` | built and accepted; the plan **file** is frozen | Implement |
 | `stale` | a *pending* plan a spec change invalidated → rewrite or drop | **set** by Frame; **cleared** by Plan (the rewrite *is* the resolution → back to `ready`) |
-| `superseded` | built, then its spec section was revised to contradict what it built | **Frame only, permanent** — it stays done + superseded as history; the resolution is a **new** plan with its own row |
+| `superseded` | built, then its spec section was revised to contradict what it built | **Frame only, permanent** — it replaces `done`, recording work that was built then invalidated; the resolution is a **new** plan with its own row |
+
+**Statuses are mutually exclusive — a row holds exactly one.** `stale` *replaces* `ready`;
+`superseded` *replaces* `done`.
 
 **Derived, never stored** — compute at report time, because a stored value lies the moment a
 dependency completes:
-- **available** = `ready` AND every `deps` entry is `done` AND not `stale`
+- **available** = `ready` AND every `deps` entry is `done`
 - **blocked** = `ready` AND some `deps` entry isn't `done`
+
+(Neither needs a "not stale" test — a `stale` row isn't `ready`.)
 
 ## Plans
 

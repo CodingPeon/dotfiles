@@ -55,18 +55,39 @@ confirmed. Enumerate to *ask*; never consume to *assume*.
 ## DETECT (is this plan implementable now?)
 - **Status lives only in `plans/INDEX.md`** (plan frontmatter is identity only: `id`, `group`,
   `title`, `covers`, `deps`). Implement only an **available** plan — *derived, not a status*: row
-  is `ready` AND every `deps` entry `done` AND not `stale`. Otherwise stop and route:
-  - `blocked` → do the dependency plan first · `stale` → **Plan** (rewrite it)
-  - `draft` → not cleared; read its `reason` → **Frame** or **Plan**
-  - `done` → already built and frozen; a change needs a **new** plan (**Plan**)
+  is `ready` AND every `deps` entry `done`. Otherwise stop and route:
+  **Statuses are mutually exclusive — a row holds exactly one** (`stale` *replaces* `ready`;
+  `superseded` *replaces* `done`). Read that stored status, then **compute** the rest — no row ever
+  *contains* `blocked` or `available`:
+  - row `ready`, all `deps` `done` → **available** → build it.
+  - row `ready`, some `deps` entry not `done` → **you computed *blocked*** → do that dependency
+    plan first.
+  - row `stale` → invalidated before it was built → **Plan** (rewrite it).
+  - row `draft` → not cleared; read its **`reason` (an INDEX column — `reason` is not in plan
+    frontmatter, which is identity-only)** → **Frame** or **Plan**, per what it says.
+  - row `done` → already built, and the plan file is frozen → a change needs a **new** plan
+    (**Plan**).
+  - row `superseded` → built, then invalidated by a spec change; it stays that way as history →
+    the follow-up is a **new** plan (**Plan**), never this one.
 
 ## ACTIONS
 - Implement the plan exactly, reusing the patterns/utilities it cites.
-- **Verify** with the CONTEXT commands (type-check / build / unit tests) and the harness where the
-  plan says so. Report real results — never claim green without running it.
+- **Verify.** Command precedence, most specific first: the **plan's Verification section** → the
+  **feature** `context/CONTEXT.md` (concrete commands — real package name, harness port) → the
+  **`<area>/CONTEXT.md`** (the generic pattern to fill in). Run type-check / build / unit tests, and
+  the harness where the plan says so. Report real results — **never claim green without running
+  it**; if a command can't run, say so rather than assuming.
 - Take the user's **inline feedback** and iterate: shallow (bug, plan tweak) → fix here and update
   the plan; deep ("the idea is wrong") → stop and send them to **Frame**.
-- **On close (implicit accept):**
+- **When to close.** Acceptance is implicit, so closing is part of finishing — not a separate
+  approval you wait for. **Close when both hold:** verification passed, **and** no feedback from
+  the user is still unresolved. Then do the write-back below and say you did it.
+  - **Never close** on failed/partial verification, or while an issue the user raised is open —
+    report and stop instead.
+  - If the user pushes back *after* you closed, iterate and **write back again**; nothing is
+    committed, so the artifacts are just an uncommitted diff you can correct.
+  - Genuinely ambiguous (half-green, unclear feedback)? Ask one short question rather than guess.
+- **The write-back (on close):**
   1. **Update NOTES** (mode-resolved) with what now exists — the durable record a future planner
      trusts. **Record any accepted deviation here**, not just in chat: what the plan said, what was
      built instead, and why. NOTES is what later phases actually read, so a deviation that only

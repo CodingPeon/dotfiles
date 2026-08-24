@@ -48,7 +48,8 @@ confirmed. Enumerate to *ask*; never consume to *assume*.
   · `done` (built and accepted; plan file frozen) · `stale` (pending plan a spec change
   invalidated → Plan) · `superseded` (built, then the spec was revised to contradict it → needs a new plan).
 - **Derived, never stored — compute these yourself:**
-  - **available** = `ready` AND every `deps` is `done` AND not `stale`.
+  - **available** = `ready` AND every `deps` is `done`. (Statuses are mutually exclusive, so no
+    "not stale" test is needed — a `stale` row isn't `ready`.)
   - **blocked** = `ready` but some dependency isn't `done`.
 - **Drift** = a `ready` plan whose `covers:` sections no longer match the current SPEC. **Report it
   as *suspected* and recommend Frame — never set `stale` yourself.** Judging whether a spec change

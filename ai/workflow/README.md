@@ -233,10 +233,13 @@ volatile state created a two-writer conflict and made a frozen `done` plan unmar
 | `ready` | cleared for Implement | Plan |
 | `done` | built and accepted; the plan **file** is frozen | Implement |
 | `stale` | *pending* plan invalidated by a spec change | **set** by Frame; **cleared** by Plan — rewriting the plan *is* the resolution, so it goes straight back to `ready` with no Frame round-trip |
-| `superseded` | built, then its spec section was revised to contradict what it built | **Frame only, and permanent** — it stays `done`+`superseded` as history; the resolution is a **new** plan, never a status change |
+| `superseded` | built, then its spec section was revised to contradict what it built | **Frame only, and permanent** — it replaces `done`, recording that the work was built and then invalidated; the resolution is a **new** plan, never a status change back |
 
+- **Statuses are mutually exclusive — a row holds exactly one.** `stale` *replaces* `ready`;
+  `superseded` *replaces* `done`. The dimensions were never independent (stale only attaches to
+  pending work, superseded only to built work), so one column loses nothing.
 - **`available` and `blocked` are derived, never stored** — `available` = `ready` + all `deps`
-  `done` + not `stale`; `blocked` = `ready` + some dep not `done`. Computed at report time, since
+  `done`; `blocked` = `ready` + some dep not `done`. (No "not stale" test: a stale row isn't `ready`.) Computed at report time, since
   a stored value would lie the moment a dependency completes.
 - **"Frozen" applies to the plan file, not its row.** Frame marks a `done` plan `superseded` in
   the INDEX; the file itself is never edited — it's the record of what was built.
