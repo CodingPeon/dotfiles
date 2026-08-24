@@ -44,70 +44,145 @@ which fixes the code and updates the docs. There is no separate review/reconcile
 
 ## Artifacts
 
-Artifacts live in **two homes**, and knowing which is which is the core of the design.
+### The all-or-nothing rule
 
-| artifact | home | written by | read by |
-|---|---|---|---|
-| `<area>/CONTEXT.md` | workspace | Frame | all phases |
-| `<feature>/CONTEXT.md` | workspace | Frame; Implement appends discovered invariants | all phases |
-| `manifest.md` | workspace | Frame | Frame, Plan, Implement |
-| `spec.md` (pending slice) | workspace | Frame; **cleared** by Implement after promotion | Frame, Plan |
-| `plans/<id>-<name>.md` | workspace | Plan; Implement annotates deviations, then frozen | Implement |
-| `plans/INDEX.md` | workspace | Frame (`stale`/`superseded`), Plan (`draft`/`ready`), Implement (`done`) | all phases |
-| **`SPEC.md`** — the WHAT | **project repo** | Implement, by promoting the slice (`merge`) | Frame, Plan |
-| **`IMPLEMENTATION_NOTES.md`** — what's built | **project repo** | Implement, on close (`merge`) | Frame, Plan |
-| design diagrams (drawio/png) | **project repo** | you (human) | Frame |
+Each artifact has exactly **one** home. **SPEC, NOTES, `plans/`, `plans/INDEX.md` and the feature's
+`context/` move together** — either all in the project repo or all in the workspace, never split.
 
-### 1. Workspace (ephemeral, versioned in the dotfiles repo — NOT the project repo)
+Why: repo files are **branch-scoped**, workspace files are **branch-agnostic**, and the two cannot
+describe each other. A workspace `INDEX.md` saying plan 10 is `done` **lies the moment you check
+out a branch where that work doesn't exist**. Splitting them guarantees incoherence.
+
+Because every artifact has one home, **there is no promotion** — nothing is staged, copied, or
+merged between homes. That also means no draft/canonical duality: in `repo` mode Frame edits the
+repo SPEC directly and the uncommitted `git diff` *is* the pending state.
+
+### The two modes (per feature, set in `manifest.md`)
+
+| | `mode: repo` | `mode: local` |
+|---|---|---|
+| SPEC · NOTES · `plans/` · `INDEX.md` · `context/` | `<repo-root>/<artifacts-root>/` | `<workspace>/<area>/<feature>/` |
+| branch semantics | branch-scoped; merges through git like code | branch-agnostic, single timeline |
+| suits | **distributed development** — several people/branches; docs reviewed and merged | **local development** — solo, sequential; work simply builds on top, nothing to reconcile |
+| project repo | carries the docs | carries no workflow docs at all |
+
+Local development is sequential, so there's no need to reconcile competing specs/plans — the
+single workspace copy is always the latest. Distributed development needs the opposite: artifacts
+that branch, conflict, and merge exactly like the code they describe.
+
+### What stays in the workspace regardless of mode
+
+Exactly two things, each for a specific reason:
+
+- **`<feature>/manifest.md`** — the **locator**. It can't live inside the thing it locates, and it
+  must be readable before you know anything about the repo's state.
+- **`<area>/CONTEXT.md`** — safe to pin because the **main-branch rule** (below) already makes it
+  branch-invariant: it may only state facts already on `main`.
+
+The feature's `context/` does **not** stay: it describes branch-scoped reality (file maps,
+invariants, the modules a feature added), so pinning it would make it lie the moment you check out
+a branch without that work. It follows the mode with everything else.
+
+### Layout — `mode: local`
+
+Everything lives in the workspace; the project repo carries no workflow docs at all.
 
 ```
 ~/agile_dotfiles/ai/workflow_artifacts/
-   <area>/                         # ide | runtime — one per project repo
-      CONTEXT.md                   # repo-wide facts (any feature here benefits)
-      <feature>/                   # a body of work you frame as a unit
-         CONTEXT.md                # THIS feature's working knowledge
-         manifest.md               # repo identity + what promotes into the project repo
-         spec.md                   # this feature's draft slice (WHAT)
+   <area>/                          # ide | runtime — one per project repo
+      CONTEXT.md                    # repo-wide facts (main-branch rule)
+      <feature>/
+         manifest.md                # mode: local
+         SPEC.md                    # the WHAT
+         IMPLEMENTATION_NOTES.md    # what's built, incl. accepted deviations
+         context/
+            CONTEXT.md              # this feature's working knowledge
+            <diagrams, PDFs, source dumps…>
          plans/
-            INDEX.md               # the plan registry
-            <id>-<name>.md         # one plan = one implementable unit
+            INDEX.md                # the plan registry (status lives ONLY here)
+            <id>-<name>.md          # one plan = one implementable unit
+
+<project repo>                      # untouched by the workflow
 ```
 
-There is **no build report**: acceptance is implicit, so what-now-exists lives in NOTES,
-what-changed in git, verification output in chat, and accepted deviations are annotated onto the
-plan file at close (which then freezes as the historical record).
+### Layout — `mode: repo`
 
-**Context cascades.** Every phase reads `<area>/CONTEXT.md` **then** `<feature>/CONTEXT.md`;
-the feature file wins on conflict (same cascade as nested `CLAUDE.md`).
-- **area** = true for any feature in the repo: toolchain + command patterns, host API surface
-  and its drifts, schema locations, styling/token rules, git policy.
-- **feature** = this feature only: its package name + concrete commands, its file map, id and
-  coordinate conventions, invariants discovered while building, its source material, its traps.
-- Boundary vs the rest: **SPEC** = the WHAT · **NOTES** = what's built · **plan** = how to build
-  one thing · **CONTEXT** = working knowledge you'd otherwise re-derive each session.
+The workspace keeps only the locator and the shared area context; everything else lives under
+`artifacts-root` in the repo, branch-scoped.
 
-Keeping these OUT of the project repo is the point: half-baked drafts never pollute it.
-Only **promotion** (Implement, per the manifest) writes accepted content into the project
-working tree.
+```
+~/agile_dotfiles/ai/workflow_artifacts/
+   <area>/
+      CONTEXT.md                    # repo-wide facts (main-branch rule)
+      <feature>/
+         manifest.md                # mode: repo + artifacts-root
 
-### 2. Canonical (in the project repo, committed by you)
+<repo-root>/<artifacts-root>/       # e.g. extensions/examples/<ext>/documentation
+   SPEC.md                          # required — the WHAT
+   IMPLEMENTATION_NOTES.md          # required — what's built, incl. accepted deviations
+   context/
+      CONTEXT.md                    # required — this feature's working knowledge
+      <supplementary material>
+   plans/
+      INDEX.md                      # required — the plan registry
+      <id>-<name>.md                # one plan = one implementable unit
+   <design diagrams>                # human-supplied source material, read-only to phases
+```
 
-These already exist in a mature repo and **accumulate across every feature** — they are the
-project's real documentation, not workflow scaffolding:
+**Minimum expected filenames** under `artifacts-root`: `SPEC.md`, `IMPLEMENTATION_NOTES.md`,
+`context/CONTEXT.md`, `plans/INDEX.md`. `artifacts-root` is configurable per feature; these four
+names are not — phases resolve them by convention, so nothing has to guess a filename. Anything
+you don't want committed simply doesn't go here (or the feature uses `local` mode).
 
-- **`SPEC.md`** — the normative WHAT for the whole extension/component. Frame drafts changes into
-  the workspace `spec.md` slice; Implement **merges** that slice in on close. Living: sections get
-  revised and removed, not just appended.
-- **`IMPLEMENTATION_NOTES.md`** — what is actually built, and the decisions/deviations behind it.
-  Implement **merges** its entry in on close. This is the file a *fresh* planner trusts to know
-  what already exists, so an accept that skips it is the workflow's main failure mode.
-- **Design diagrams** (drawio/png) — your source material, alongside those docs. Read-only to
-  every phase; they get distilled into SPEC/CONTEXT, never rewritten.
+### Ownership
 
-Both docs are named by the feature `manifest.md`'s `duplicate-to-repo` paths, so phases never
-guess filenames — and both arrive as an **uncommitted working-tree diff** for you to review and
-commit. Nothing here is workflow-specific: point the manifest at whatever docs a repo already has
-(or at nothing, and the whole loop stays ephemeral).
+| artifact | written by | read by |
+|---|---|---|
+| `<area>/CONTEXT.md` | Frame (main-branch facts only) | all phases |
+| `<feature>/context/CONTEXT.md` | Frame; Implement appends discovered invariants | all phases |
+| `manifest.md` | Frame | Frame, Plan, Implement |
+| **`SPEC.md`** — the WHAT | Frame, directly | Frame, Plan |
+| **`IMPLEMENTATION_NOTES.md`** — what's built, incl. accepted deviations | Implement, on close | Frame, Plan |
+| `plans/<id>-<name>.md` | Plan; frozen once `done` | Implement |
+| `plans/INDEX.md` | Frame (`stale`/`superseded`), Plan (`draft`/`ready`), Implement (`done`) | all phases |
+| design diagrams | you (human) | Frame |
+
+- **NOTES is the file a *fresh* planner trusts** to know what already exists — so an accept that
+  skips updating it is the workflow's main failure mode. It's also where **accepted deviations**
+  belong: a deviation recorded only on a frozen plan file is invisible, because nothing reads a
+  `done` plan.
+- Boundary: **SPEC** = the WHAT · **NOTES** = what's built · **plan** = how to build one thing ·
+  **CONTEXT** = working knowledge you'd otherwise re-derive each session.
+- **No build report:** what-now-exists → NOTES, what-changed → git, verification output → chat.
+
+### Context cascade, and the main-branch rule
+
+Every phase reads `<area>/CONTEXT.md` **then** `<feature>/context/CONTEXT.md`; the feature file
+wins on conflict (same cascade as nested `CLAUDE.md`).
+
+- **`<area>/CONTEXT.md` states only facts already on `main`.** It's shared by every feature and
+  read from every branch, so a fact that exists only on one feature branch would mislead all the
+  others.
+- Therefore a new fact **starts in feature context and graduates to area context once it merges to
+  `main`.** That graduation is a real step someone performs — Frame does it.
+- **feature** context = this feature only: package name + concrete commands, file map, id and
+  coordinate conventions, invariants discovered while building, source material, traps.
+
+## The startup gate (every phase, every session)
+
+Before touching anything, a phase confirms **two** things with you and **stops** if either fails:
+
+1. **Which feature** this session is for. Branch names and the working tree are *hints, never
+   authority* — a phase confirms rather than infers, because the feature decides where every
+   artifact lives.
+2. **That the correct branch is checked out.** A phase reports `git branch --show-current` and asks
+   you to confirm. **No phase ever creates, switches, or checks out a branch** — its job is to
+   verify, and to stop if the answer is wrong. In `repo` mode the branch decides *which* SPEC,
+   NOTES and INDEX exist at all, so a wrong branch produces confidently wrong work.
+
+`<area>` is **one per project repo** (`ide`, `runtime`, …) — a short label you choose, not derived.
+Phases find the existing one by matching `git remote get-url origin` against `repo-remote` in
+`workflow_artifacts/*/*/manifest.md`, and ask you to name a new one.
 
 ## Invariants every phase obeys
 
