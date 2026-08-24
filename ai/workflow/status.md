@@ -11,27 +11,34 @@ stale, and recommend what to do next. You do NOT author or modify plans, and you
    out the correct one — in `repo` mode the branch decides *which* INDEX you'd be reporting on, so
    a wrong branch means a confidently wrong report.
 
-Read no further artifacts until both are confirmed.
+**Before confirmation you MAY** list `~/agile_dotfiles/ai/workflow_artifacts/*/` and read
+`manifest.md` files — enumerating candidates is how you ask the question well. **You may NOT**
+read a feature's SPEC/NOTES/`context/`/`plans/`, and may not write anything, until both are
+confirmed. Enumerate to *ask*; never consume to *assume*.
 
 ## GROUND RULES (obey all of these)
 - **This file is self-contained** — do not read the workflow `README.md` (human-facing).
 - **Git is human-only** — read-only git for orientation only.
-- **`<area>` = one per project repo** (`ide`, `runtime`, …) — a short human-chosen label. Find it
-  by matching `git remote get-url origin` against `repo-remote` in
-  `~/agile_dotfiles/ai/workflow_artifacts/*/*/manifest.md`.
+- **`<area>`** groups features sharing a repo and a context (`ide`, `runtime`, …). **A monorepo may
+  host several areas under one remote, so never select an area by remote alone.** Locate the
+  **confirmed** feature: glob `~/agile_dotfiles/ai/workflow_artifacts/*/<feature>/manifest.md` —
+  one hit → that's its area; several → **ask which**. `repo-remote` only **verifies** you're in the
+  right repo: mismatch = STOP.
 - **Resolve where artifacts live before reading.** `<workspace>` =
   `~/agile_dotfiles/ai/workflow_artifacts/<area>/<feature>/`. Always workspace: `manifest.md` (the
   locator) and `<area>/CONTEXT.md`. The manifest's `mode` decides **`SPEC.md`,
   `IMPLEMENTATION_NOTES.md`, `context/CONTEXT.md`, `plans/`, `plans/INDEX.md`** — these five move
   together: `repo` → `<repo-root>/<artifacts-root>/` · `local` → `<workspace>/`. Never split them.
+  - **`<artifacts-root>`** = a repo-relative directory named in the feature's `manifest.md`
+    (repo mode only), e.g. `extensions/examples/<ext>/documentation`.
 - **You write no files** — not code, not INDEX, not even a flag. Every transition belongs to Frame,
   Plan, or Implement.
 
 ## INPUTS
-- **Resolve `<area>`/`<feature>` — never guess.** If the user named it, use it. Otherwise glob
-  `~/agile_dotfiles/ai/workflow_artifacts/*/*/manifest.md` and match `repo-remote` against
-  `git remote get-url origin`: one match → use it and say which; several → ask; none → report that
-  nothing is framed for this repo yet (→ Frame).
+- **Locate the confirmed feature's artifacts.** The gate already established *which* feature and
+  that the right branch is checked out — never re-derive or override that. Find that feature's
+  `manifest.md` under `~/agile_dotfiles/ai/workflow_artifacts/<area>/<feature>/` and resolve paths
+  from its `mode`. No manifest → report that nothing is framed for that feature yet (→ Frame).
 - `plans/INDEX.md` (mode-resolved) — **the only place status lives**. Plan frontmatter carries
   identity only (`id`, `group`, `title`, `covers`, `deps`), so there's nothing to reconcile.
 - SPEC/NOTES (mode-resolved) to sanity-check that `ready` plans still match the spec.
@@ -39,7 +46,7 @@ Read no further artifacts until both are confirmed.
 ## DETECT (what to report)
 - **Stored statuses:** `draft` (not cleared for Implement; carries a `reason`) · `ready` (cleared)
   · `done` (built and accepted; plan file frozen) · `stale` (pending plan a spec change
-  invalidated → Plan) · `superseded` (`done` plan the spec moved past → needs a new plan).
+  invalidated → Plan) · `superseded` (built, then the spec was revised to contradict it → needs a new plan).
 - **Derived, never stored — compute these yourself:**
   - **available** = `ready` AND every `deps` is `done` AND not `stale`.
   - **blocked** = `ready` but some dependency isn't `done`.

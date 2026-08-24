@@ -22,10 +22,9 @@ for the three doing-phases; **`status` is unprefixed — it's an anytime utility
 ## The loop
 
 ```
-FRAME      (Opus)    problem + context  → spec.md slice + CONTEXT (workspace drafts)
+FRAME      (Opus)    problem + context  → SPEC (edited in place) + CONTEXT
 PLAN       (Opus)    docs + INDEX       → plans/*.md + INDEX rows
-IMPLEMENT  (Sonnet)  one plan + CONTEXT → code + verify → IMPLEMENTATION_NOTES + INDEX `done`,
-                                          then promote SPEC/NOTES into the repo working tree
+IMPLEMENT  (Sonnet)  one plan + CONTEXT → code + verify → IMPLEMENTATION_NOTES + INDEX `done`
 
 STATUS     (cheap, anytime)  read INDEX → available / blocked / stale + recommend next
 ```
@@ -213,6 +212,10 @@ a durable fact into a `CONTEXT.md` is **not** promotion.
 
 ## INDEX conventions & the state model
 
+> **Canonical schema: `index.template.md`.** `1-plan.md` carries a convenience summary of the row
+> schema so routine row-writing needs no extra read — so **if you add or rename a column in the
+> template, mirror it into that summary**, or the two will drift.
+
 Row per plan: `id · group · title · status · covers · deps · reason`.
 - `group` = sub-feature tag (path-like for nesting); a group may span many plans.
 - `id` = integer in **tens-blocks per group** (10,11,12 … next group at 20). Never reused or
@@ -229,8 +232,8 @@ volatile state created a two-writer conflict and made a frozen `done` plan unmar
 | `draft` | written, not cleared for Implement (needs a `reason`) | Plan |
 | `ready` | cleared for Implement | Plan |
 | `done` | built and accepted; the plan **file** is frozen | Implement |
-| `stale` | *pending* plan invalidated by a spec change | **Frame only** |
-| `superseded` | *`done`* plan the spec moved past; needs a **new** plan | **Frame only** |
+| `stale` | *pending* plan invalidated by a spec change | **set** by Frame; **cleared** by Plan — rewriting the plan *is* the resolution, so it goes straight back to `ready` with no Frame round-trip |
+| `superseded` | built, then its spec section was revised to contradict what it built | **Frame only, and permanent** — it stays `done`+`superseded` as history; the resolution is a **new** plan, never a status change |
 
 - **`available` and `blocked` are derived, never stored** — `available` = `ready` + all `deps`
   `done` + not `stale`; `blocked` = `ready` + some dep not `done`. Computed at report time, since

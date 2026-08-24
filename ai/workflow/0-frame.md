@@ -10,7 +10,10 @@ You do NOT plan implementation steps and you do NOT write code.
    for this work. **Never create, switch, or check out a branch.** If it's wrong, STOP and ask the
    user to check out the correct one — your job is to verify, not to fix it.
 
-Read no further artifacts and write nothing until both are confirmed.
+**Before confirmation you MAY** list `~/agile_dotfiles/ai/workflow_artifacts/*/` and read
+`manifest.md` files — enumerating candidates is how you ask the question well. **You may NOT**
+read a feature's SPEC/NOTES/`context/`/`plans/`, and may not write anything, until both are
+confirmed. Enumerate to *ask*; never consume to *assume*.
 
 ## GROUND RULES (obey all of these)
 - **This file is self-contained** — do not read the workflow `README.md` (human-facing).
@@ -18,10 +21,13 @@ Read no further artifacts and write nothing until both are confirmed.
 - **Git is human-only.** Never `add/commit/merge/push/rebase/reset/checkout`/branch-create.
   Read-only git for orientation only. You may **write files into the repo working tree**; the
   human reviews `git diff` and commits.
-- **`<area>` = one per project repo** (`ide`, `runtime`, …) — a short human-chosen label, not
-  derived from anything. Find the existing one by matching `git remote get-url origin` against
-  `repo-remote` in `~/agile_dotfiles/ai/workflow_artifacts/*/*/manifest.md`; if no area matches
-  this repo yet, **ask the user for the label** before creating one.
+- **`<area>`** groups features sharing a repo and a context (`ide`, `runtime`, …) — a short
+  human-chosen label, never derived. Usually one per project repo, but **a monorepo may host
+  several under one remote, so never select an area by remote alone.** Locate the **confirmed**
+  feature instead: glob `~/agile_dotfiles/ai/workflow_artifacts/*/<feature>/manifest.md` — one hit
+  → that's its area; several → **ask which**; none → it's a new feature, so **ask the user which
+  area it belongs to** (offer the existing labels; a new label is theirs to choose).
+  `repo-remote` only **verifies** you're in the right repo: mismatch = STOP.
 - **Resolve where artifacts live before touching anything.** `<workspace>` =
   `~/agile_dotfiles/ai/workflow_artifacts/<area>/<feature>/`.
   - **Always workspace:** `<workspace>/manifest.md` (the locator) and `<area>/CONTEXT.md` (safe
@@ -29,6 +35,8 @@ Read no further artifacts and write nothing until both are confirmed.
   - The manifest's `mode` decides **`SPEC.md`, `IMPLEMENTATION_NOTES.md`, `context/CONTEXT.md`,
     `plans/`, `plans/INDEX.md`** — these five move together:
     - `mode: repo` → under `<repo-root>/<artifacts-root>/` (branch-scoped).
+  - **`<artifacts-root>`** = a repo-relative directory named in the feature's `manifest.md`
+    (repo mode only), e.g. `extensions/examples/<ext>/documentation`.
     - `mode: local` → under `<workspace>/` (branch-agnostic; repo untouched).
   - **All-or-nothing** — never split that set. A workspace INDEX beside a repo SPEC lies the moment
     another branch is checked out; feature context describing branch-only files does the same.

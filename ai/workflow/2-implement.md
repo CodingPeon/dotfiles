@@ -12,7 +12,10 @@ say so.
    user to check out the correct one — your job is to verify, not to fix it. This matters most
    here: you write code, and writing it onto the wrong branch is expensive to undo.
 
-Read no further artifacts and write nothing until both are confirmed.
+**Before confirmation you MAY** list `~/agile_dotfiles/ai/workflow_artifacts/*/` and read
+`manifest.md` files — enumerating candidates is how you ask the question well. **You may NOT**
+read a feature's SPEC/NOTES/`context/`/`plans/`, and may not write anything, until both are
+confirmed. Enumerate to *ask*; never consume to *assume*.
 
 ## GROUND RULES (obey all of these)
 - **This file is self-contained** — do not read the workflow `README.md` (human-facing). Do read
@@ -20,9 +23,11 @@ Read no further artifacts and write nothing until both are confirmed.
 - **Git is human-only. NEVER run `add`/`commit`/`merge`/`push`/`rebase`/`reset`/`checkout`/
   branch-create.** Read-only git for orientation only. You **write files into the working tree**
   and then **STOP** — the human reviews `git diff` and commits.
-- **`<area>` = one per project repo** (`ide`, `runtime`, …) — a short human-chosen label. Find it
-  by matching `git remote get-url origin` against `repo-remote` in
-  `~/agile_dotfiles/ai/workflow_artifacts/*/*/manifest.md`.
+- **`<area>`** groups features sharing a repo and a context (`ide`, `runtime`, …). **A monorepo may
+  host several areas under one remote, so never select an area by remote alone.** Locate the
+  **confirmed** feature: glob `~/agile_dotfiles/ai/workflow_artifacts/*/<feature>/manifest.md` —
+  one hit → that's its area; several → **ask which**. `repo-remote` only **verifies** you're in the
+  right repo: mismatch = STOP.
 - **Resolve where artifacts live before touching anything.** `<workspace>` =
   `~/agile_dotfiles/ai/workflow_artifacts/<area>/<feature>/`.
   - **Always workspace:** `<workspace>/manifest.md` (the locator) and `<area>/CONTEXT.md`
@@ -30,6 +35,8 @@ Read no further artifacts and write nothing until both are confirmed.
   - The manifest's `mode` decides **`SPEC.md`, `IMPLEMENTATION_NOTES.md`, `context/CONTEXT.md`,
     `plans/`, `plans/INDEX.md`** — these five move together:
     `repo` → `<repo-root>/<artifacts-root>/` · `local` → `<workspace>/`.
+  - **`<artifacts-root>`** = a repo-relative directory named in the feature's `manifest.md`
+    (repo mode only), e.g. `extensions/examples/<ext>/documentation`.
   - **All-or-nothing** — never split that set. There is **no promotion**: you write each artifact
     once, in its one home.
 - Operate on the repo the agent is in: root = `git rev-parse --show-toplevel`; confirm
@@ -39,8 +46,11 @@ Read no further artifacts and write nothing until both are confirmed.
   Area context states only facts already on `main` — treat it as read-only here.
 
 ## INPUTS
-- One plan file (mode-resolved `plans/<id>-<name>.md`) + `manifest.md` + the cascading context and
-  `context/` supplementary material + SPEC/NOTES for the surrounding truth.
+- **Locate the confirmed feature's artifacts.** The gate already established *which* feature and
+  that the right branch is checked out — never re-derive or override that. Read that feature's
+  `manifest.md` and resolve every path from its `mode`.
+- One plan file (mode-resolved `plans/<id>-<name>.md`) + the cascading context and `context/`
+  supplementary material + SPEC/NOTES for the surrounding truth.
 
 ## DETECT (is this plan implementable now?)
 - **Status lives only in `plans/INDEX.md`** (plan frontmatter is identity only: `id`, `group`,
