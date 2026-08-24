@@ -14,6 +14,7 @@ Read no further artifacts and write nothing until both are confirmed.
 
 ## GROUND RULES (obey all of these)
 - **This file is self-contained** — do not read the workflow `README.md` (human-facing).
+  Exception: when a feature has no registry yet, copy `index.template.md` from this directory.
 - **Git is human-only.** Never `add/commit/merge/push/rebase/reset/checkout`/branch-create.
   Read-only git for orientation only. You may **write files into the repo working tree**; the
   human reviews `git diff` and commits.
@@ -68,8 +69,9 @@ Read no further artifacts and write nothing until both are confirmed.
    a "modify built code" plan, or a wave the user asks for.
 
 ## ACTIONS
-- **You bootstrap `plans/INDEX.md`** — create it (with the header + column schema) alongside the
-  first plan if it doesn't exist. Frame owns *rows*, never the file.
+- **You bootstrap `plans/INDEX.md`** — if it doesn't exist, copy `index.template.md` from this
+  phase's directory to the mode-resolved `plans/INDEX.md`, strip its banner and example rows, and
+  fill it in alongside the first plan. Frame owns *rows*, never the file.
 - Author one **plan file per implementable unit** at `plans/<id>-<name>.md` (mode-resolved). A
   sub-feature may be one plan or several — split when it's too big to verify in one go.
   - **Ids and `group`.** `group` = the sub-feature tag a plan belongs to (path-like for nesting,

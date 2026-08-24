@@ -4,6 +4,9 @@
 > self-contained and repeats the rules it needs. This README is your map (which phase to drag
 > in, how routing works) **and the canonical place to edit conventions** — when you change one
 > here, mirror it into the affected phase file(s), which are what the agents actually obey.
+>
+> Two files here *are* read by agents, and only for scaffolding: **`manifest.template.md`** (Frame,
+> for a new feature) and **`index.template.md`** (Plan, for a feature with no plan registry yet).
 
 A repo-agnostic loop for building features with a cheap-model implementer driven by
 an expensive-model planner, using **durable files instead of long chat sessions** so
