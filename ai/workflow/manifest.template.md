@@ -1,53 +1,36 @@
 # Manifest — <feature name>
 
 > **Audience: the Frame phase**, and only when scaffolding a **new** feature — copy this to
-> `<area>/<feature>/manifest.md` and fill it. Every other phase reads the **filled** manifest.
+> `<area>/<feature>/manifest.md` and fill it in. Every other phase reads the **filled** manifest.
+>
+> The model behind these fields (all-or-nothing, the two modes, what stays in the workspace, the
+> resolution procedure) lives in **`ARTIFACTS.md`** — this file is just the skeleton.
 
-The manifest answers two things: **which repo** this feature belongs to, and **where its
-artifacts live**. Nothing else — anything a phase only *reads* (build commands, APIs, gotchas)
-belongs in `context/CONTEXT.md`.
+The manifest answers two things: **which repo** this feature belongs to, and **where its artifacts
+live**. Anything a phase only *reads* (build commands, APIs, gotchas) belongs in
+`context/CONTEXT.md` instead.
 
 ```yaml
 feature: <human name>
-area: <ide | runtime>
-repo-remote: <git remote URL>   # stable identity — matches feature↔repo across any clone or
-                                # worktree. Root and branch are always read live, never stored.
+area: <ide | runtime | …>       # groups features sharing a repo + context
 
-# WHERE THE ARTIFACTS LIVE — all-or-nothing, never split. The set is:
-#   SPEC.md · IMPLEMENTATION_NOTES.md · context/CONTEXT.md · plans/ · plans/INDEX.md
-#   repo  = they live IN the project repo under artifacts-root, branch-scoped, merging through git
-#           like the code they describe. For distributed/team work, or work already committing docs.
-#   local = they live in the workspace, branch-agnostic; the project repo carries no workflow docs
-#           at all. For solo, sequential development.
-mode: local
+repo-remote: <git remote URL>   # stable identity across any clone or worktree. Used only to
+                                # VERIFY you're in the right repo (mismatch = STOP), never to
+                                # select a feature. Root and branch are always read live.
 
-# repo mode only — repo-relative directory the artifacts live under.
-# artifacts-root: <e.g. extensions/examples/<ext>/documentation>
+mode: local                     # local | repo — see ARTIFACTS.md. Decides, all-or-nothing, where
+                                # SPEC.md · IMPLEMENTATION_NOTES.md · context/CONTEXT.md ·
+                                # plans/ · plans/INDEX.md live:
+                                #   repo  → <repo-root>/<artifacts-root>/  (branch-scoped)
+                                #   local → the workspace                 (branch-agnostic)
+
+# artifacts-root: <repo-relative dir>   # REQUIRED for mode: repo; omit for local.
+                                        # e.g. extensions/examples/<ext>/documentation
 ```
 
-## Why all-or-nothing
-
-Splitting the set across the two homes is incoherent: a workspace `INDEX.md` claiming a plan is
-`done` **lies the moment you check out a branch where that work doesn't exist**. Branch-scoped
-artifacts (repo) and branch-agnostic ones (workspace) cannot describe each other. So SPEC, NOTES,
-`plans/` and `INDEX.md` move together.
-
-## Always in the workspace, in both modes
-
-Exactly two, each for a reason:
-- **`manifest.md`** — the **locator**; it can't live inside the thing it locates, and it must be
-  readable before you know anything about the repo's state.
-- **`<area>/CONTEXT.md`** — safe to pin because it may only state facts already on `main`, which
-  makes it branch-invariant by construction.
-
-The feature's **`context/`** does *not* stay: it describes branch-scoped reality (file maps,
-invariants, modules a feature added), so pinning it would make it lie on any branch without that
-work. It follows the mode with SPEC, NOTES and plans. `context/` is a **folder** — `CONTEXT.md`
-plus supplementary material (diagrams, PDFs, source dumps); keep anything you don't want committed
-out of it, or use `local` mode.
-
-## No promotion, in either mode
-
-Each artifact has exactly **one** home, so nothing is ever staged, copied, or merged between the
-two. In `repo` mode phases write straight into the **repo working tree**; the human reviews
-`git diff` and commits. In `local` mode nothing touches the repo at all.
+Field notes:
+- **`mode`** — pick `repo` for distributed/team work (or work already committing its docs), `local`
+  for solo sequential work where the project repo should carry no workflow docs at all.
+- **`artifacts-root`** — only meaningful in `repo` mode. The four filenames beneath it are fixed by
+  convention (`SPEC.md`, `IMPLEMENTATION_NOTES.md`, `context/CONTEXT.md`, `plans/INDEX.md`).
+- **`manifest.md` and `<area>/CONTEXT.md` always stay in the workspace**, in both modes.
