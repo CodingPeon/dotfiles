@@ -35,14 +35,23 @@ contradict it → needs a **new** plan).
 **Drift** = a `ready` plan whose `covers:` sections no longer match the current SPEC. **Report it as
 *suspected* and recommend Frame — never set `stale` yourself.** Judging whether a spec change
 actually invalidates work is Frame's call; a wrong flag invents work or hides real work.
+- **What to flag** (keep it cheap and bounded): a `covers:` id that **no longer exists** in SPEC, or
+  a covered section whose text has **visibly changed** since the plan was written. That's it —
+  **don't reason about whether the change invalidates the plan**; that judgement is Frame's, and
+  guessing at it is how you produce a noisy, useless report.
+- If you can't tell, say "possible drift, unverified" rather than either asserting or hiding it.
 
-**Mode sanity check:** in `repo` mode, note if SPEC/NOTES/plans have **uncommitted** changes — the
-user may have work in the tree they haven't committed. Read-only observation, no action.
+**Mode sanity check:** in `repo` mode, note whether the artifacts at the mode-resolved location
+(`SPEC.md`, `IMPLEMENTATION_NOTES.md`, `context/`, `plans/`) have **uncommitted** changes — the user
+may have work in the tree they haven't committed. Read-only observation, no action.
 
 ## ACTIONS
 - Print the plan landscape, grouped by `group` (roll up: "§10 dataflow: 2/3 done").
-- List the **available** plans and **recommend the next** one (respect `deps`; prefer unblocking the
-  most-depended-on work).
+- List the **available** plans and **recommend the next** one. Tie-break in this order:
+  1. **Most-depended-on** — the plan whose `id` appears in the most other plans' `deps` (it unblocks
+     the most work). Count them; don't eyeball it.
+  2. Then the lowest `id` (plans within a group are numbered in intended order).
+  Say *why* you recommended it in one clause, so the user can disagree cheaply.
 - Note anything `stale`/`superseded`/`draft` and which phase clears it (Plan for `stale`; Frame then
   Plan for `superseded`; read the `reason` for `draft`).
 

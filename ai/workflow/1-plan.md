@@ -33,7 +33,9 @@ If you cannot read them, **STOP** and say so — they carry rules you must obey.
 ## DETECT (what needs planning)
 1. **Locate the confirmed feature's artifacts** per `ARTIFACTS.md`. No manifest for the confirmed
    feature → nothing is framed for it yet → **Frame**.
-2. Read `INDEX.md` and report the landscape + a recommended next — same as Status.
+2. Read `INDEX.md` and open by reporting the landscape: plans grouped by `group`, which are
+   **available** (`ready` + all `deps` `done`), which are **blocked**, and anything
+   `draft`/`stale`/`superseded` with its `reason` — plus a recommended next.
 3. Work to do = sub-features with no plan yet · `stale` plans to rewrite · `superseded` items
    needing a "modify built code" plan · or a wave the user asks for.
 
@@ -49,14 +51,24 @@ If you cannot read them, **STOP** and say so — they carry rules you must obey.
   - **Body must have:** **Context** (why) · **Requirements** · **Reusable pieces** with exact
     `file:line` pointers · **Design per file** · **Files to create/modify** · **Verification**
     (exact commands + harness steps) · **Acceptance criteria**.
+  - **Verification must be runnable.** Source the commands from the plan's own work, then the
+    feature `context/CONTEXT.md` (concrete), then `<area>/CONTEXT.md` (the generic pattern). **If
+    you cannot produce runnable commands, do not hand off the plan** — an unrunnable Verification
+    section blocks Implement, which may not close without one. Ask the user for them, put them in
+    the plan, and note that they belong in the feature CONTEXT (Frame files them; you don't).
   - Cite existing patterns/utilities to reuse (both CONTEXT tiers + the repo) — don't invent new
     code where something fits.
 - **"You do NOT write source files" ≠ prose-only plans.** Plans *should* carry exact commands,
   concrete signatures, and illustrative snippets or small diffs — that precision is what lets a
   cheap implementer follow them literally. Just never create or edit an actual source file.
-- **Batch only independent features** into a wave. Dependent work: plan the next only after the
-  prior is `done` — a later plan can rest on an assumption an earlier implementation breaks. A
-  "wave" is a conversational grouping you report in chat, **not** recorded state.
+- **Batching: the test is whether you'd be *guessing*, not whether there's a dependency.**
+  - **Mechanical dependency → author both now.** If plan 11 merely needs plan 10 built first, but
+    you can already describe 11 accurately, write both and set `deps: [10]`. That is exactly what
+    `deps` is for, and it's the only way a row is ever **blocked**.
+  - **Epistemic dependency → author one and stop.** If you can't write the later plan accurately
+    until you see what the earlier one actually produced (its shape, its API, whether the approach
+    survives), planning ahead just manufactures a plan that will go `stale`. Say so and stop.
+  - A "wave" is a conversational grouping you report in chat, **not** recorded state.
 - If a plan keeps re-explaining the same environment fact, that fact belongs in a `CONTEXT.md`
   tier — say so, so the next Frame records it there.
 - If the WHAT is unclear or an older spec section needs changing, **don't guess — send it back to
@@ -68,8 +80,9 @@ If you cannot read them, **STOP** and say so — they carry rules you must obey.
 
 ## OUTPUTS (the only files you write)
 - `plans/*.md` — **un-executed only**; never a `done` plan.
-- `plans/INDEX.md` rows — `draft`/`ready` only (plus **clearing** an existing `stale`, per above).
-  `draft` **requires** a `reason`.
+- `plans/INDEX.md` — the file itself (you bootstrap it), `draft`/`ready` rows (plus **clearing** an
+  existing `stale`, per above), and **the Backlog table**: add entries for work you've identified but
+  aren't planning yet, and remove an entry when it becomes a plan. `draft` **requires** a `reason`.
 
 **You never write:** source files · SPEC / `CONTEXT.md` (Frame owns) · NOTES (Implement owns) ·
 any git state.

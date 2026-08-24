@@ -13,13 +13,26 @@ to reconcile and no two-writer conflict.
 
 - **`id`** — integer in **tens-blocks per group**: a new group takes the next free block
   (10, 20, 30…), plans within it increment (10, 11, 12). **Never reused, never renumbered**; a
-  group that overflows its block takes the next free block and notes it.
-- **`group`** — the sub-feature tag a plan belongs to; path-like for nesting
-  (`dataflow/subtask`). One group may span many plans; one plan belongs to exactly one group.
+  group that overflows its block takes the next free block and notes it. An id from a **dropped**
+  plan stays burned — never hand it to a different plan, or history stops meaning anything.
+- **`group`** — a short free-form label for the sub-feature a plan belongs to (`§10 dataflow`,
+  `add-modal`). Use a path-like form (`dataflow/subtask`) only if you actually need nesting. One
+  group may span many plans; one plan belongs to exactly one group. **Mirror whatever convention
+  the table already uses** rather than introducing a second one.
 - **`title`** — what the plan delivers, in a few words.
-- **`covers`** — the SPEC **section ids** this plan implements (e.g. `§10.2, §3.2`), the same ids
-  Frame assigns. Not free text, not sub-feature names. **Frame's ripple check matches on this**, so
-  a spec change can only find the work it invalidates through this column.
+- **`covers`** — the SPEC **section ids** this plan implements. **Frame's ripple check matches on
+  this**, so a spec change can only find the work it invalidates through this column. Get the form
+  wrong and invalidation fails *silently*.
+  - **An id is the SPEC section's number.** Headings usually carry no `§` (`## 10.2 Triggers`), so
+    the id there is `10.2`; write it `§10.2` here for readability and **match on the number**.
+    Frame owns numbering and never renumbers, so a plain search for the number finds the section.
+  - **Explicit, comma-separated ids only — ranges are NOT legal.** `§10.1–.5` will not match a
+    search for `§10.3`. Write `§10.1, §10.2, §10.3, …` or use the parent (below).
+  - **A parent id covers its subsections.** `§10` matches a revision of `§10.3`. So when a plan
+    implements a whole section, `§10` is enough — listing every child as well is redundant.
+    Matching a revised `§X.Y` therefore means: `covers` contains `§X.Y`, **or any ancestor of it**.
+  - A plan may cover a section only **partly** — `covers` says "this plan touches §10.2", not
+    "§10.2 is finished". Completeness lives in `IMPLEMENTATION_NOTES.md`.
 - **`deps`** — **plan ids** that must be `done` before this one can start. `—` for none.
 - **`reason`** — **required** whenever status is `draft`, `stale`, or `superseded`; `—` otherwise.
 
@@ -60,6 +73,12 @@ the durable record belongs in `IMPLEMENTATION_NOTES.md`, this is just a pointer)
 
 Things the SPEC calls for that have **no plan yet**. A row in *Plans* means a plan file exists; an
 entry here means it doesn't. Run **Plan** to turn one into plan file(s).
+
+**Writers:** **Plan** owns this table — it adds entries for work it identifies but isn't planning
+yet, and **removes an entry when it becomes a plan**. **Frame** may add an entry for something it
+just specced but isn't planning, and may amend or remove one whose spec basis changed. Backlog
+entries have **no status** — `stale`/`superseded` apply only to real plans — so a ripple that hits a
+backlog entry is handled by editing or deleting the entry, not by flagging it.
 
 | group | title | covers | notes |
 |-------|-------|--------|-------|
