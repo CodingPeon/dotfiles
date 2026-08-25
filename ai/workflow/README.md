@@ -19,6 +19,7 @@ from the same directory, resolves the artifacts, and does its one job.
 | `1-plan.md` | turn the WHAT into **plans** + INDEX rows | you drag it |
 | `2-implement.md` | build **one plan**, verify, record what exists | you drag it |
 | `status.md` | report what's available/blocked/stale — **anytime**, writes nothing | you drag it |
+| `triage.md` | diagnose a *problem*: bug / spec wrong / not-a-defect, + a handoff brief — **anytime**, writes nothing | you drag it |
 | **`GROUND-RULES.md`** | startup gate · git policy · what to read · stay in your lane | every phase |
 | **`ARTIFACTS.md`** | vocabulary · locating the feature · modes · layouts · context cascade | every phase |
 | **`index.template.md`** | INDEX schema + status model (**canonical**) | Plan; Implement/Status as needed |
@@ -26,7 +27,8 @@ from the same directory, resolves the artifacts, and does its one job.
 
 Each rule has **exactly one home**. Phases reference rather than restate, so a convention change is
 one edit. Recommended session model is noted at the top of each phase; filenames carry a
-reading-order digit for the three doing-phases (`status` is unprefixed — it's a utility, not a step).
+reading-order digit for the three doing-phases — `status` and `triage` are unprefixed because
+they're **read-only utilities you drag in any time**, not steps in the loop.
 
 ## The loop
 
@@ -36,6 +38,7 @@ PLAN       (Opus)    docs + INDEX       → plans/*.md + INDEX rows
 IMPLEMENT  (Sonnet)  one plan + CONTEXT → code + verify → IMPLEMENTATION_NOTES + INDEX `done`
 
 STATUS     (cheap, anytime)  read INDEX → available / blocked / stale + recommend next
+TRIAGE     (cheap, anytime)  a problem  → verdict (bug / spec / not-a-defect) + handoff brief
 ```
 
 Review is **you**, and acceptance is the default — you give feedback *inline during Implement*,
@@ -51,7 +54,18 @@ which fixes the code and updates the docs. There's no separate review or reconci
   - **Big / needs planner or framer judgment → switch:** plan wrong → **Plan**; spec wrong →
     **Frame**. Invalidating an *already-built* spec section is always **Frame**.
   - Implementation bugs are always **Implement**.
-- **Status** sits outside this chain — drag it in whenever you want the landscape.
+- **Found bad behaviour and don't know which lane?** That's the common case — you usually can't tell
+  a bug from a bad spec by looking. Drag in **`triage.md`**: it reads the governing SPEC section,
+  NOTES and CONTEXT and returns a verdict (**not-a-defect** — an accepted deviation, a documented
+  follow-up, or a known trap · **bug** · **spec problem** · **spec gap**) plus one of four lanes:
+  **none** · **outside the workflow** (a trivial bug — not a phase; the phases are for planned work)
+  · **Plan** · **Frame**.
+  - It also hands back a **handoff brief** to paste into whichever session fixes it — which is what
+    makes "just fix it outside the workflow" safe. Without it, a fresh agent can't tell a deliberate
+    deviation from a defect and will "correct" it, undoing a decision you made on purpose.
+  - You can skip it and guess; both entry points self-correct (Plan bounces a spec problem back to
+    Frame with a `draft` row; Frame tells you it's really a bug). Triage just saves the round-trip.
+- **Status and Triage sit outside this chain** — both read-only, drag either in any time.
 
 ## Choosing a mode (the one decision per feature)
 
