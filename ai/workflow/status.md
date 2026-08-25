@@ -17,8 +17,12 @@ If you cannot read them, **STOP** and say so.
   Frame, Plan, or Implement. Reporting is your entire job.
 
 ## INPUTS
-- `plans/INDEX.md` (mode-resolved) — **the only place status lives**. Plan frontmatter is identity
-  only, so there is nothing to reconcile.
+- `plans/INDEX.md` (mode-resolved) — **the single source of truth** for `status`, `reason`,
+  `covers` and `deps`. Plan frontmatter is bare identity (`id`, `group`, `title`), so nothing is
+  duplicated and nothing can drift.
+  - **If it doesn't exist**, the feature has been framed but never planned. Say exactly that,
+    report any Backlog/SPEC work you can see, and recommend **Plan**. That's a valid report, not an
+    error — don't stop as if something were broken.
 - SPEC/NOTES (mode-resolved), to sanity-check that `ready` plans still match the spec.
 
 ## DETECT (what to report)
@@ -31,12 +35,18 @@ contradict it → needs a **new** plan).
 **Derived, never stored — compute these yourself:**
 - **available** = `ready` AND every `deps` entry is `done`.
 - **blocked** = `ready` AND some dependency isn't `done`.
+- When ranking most-depended-on, count `deps` mentions across **all** rows — a blocked or draft
+  dependent still represents work that finishing this plan would unblock.
 
 **Drift** = a `ready` plan whose `covers:` sections no longer match the current SPEC. **Report it as
 *suspected* and recommend Frame — never set `stale` yourself.** Judging whether a spec change
 actually invalidates work is Frame's call; a wrong flag invents work or hides real work.
+- **Read SPEC as it is in the working tree** — the version you can actually read — and report any
+  uncommitted state separately (below) rather than diffing against the committed copy.
 - **What to flag** (keep it cheap and bounded): a `covers:` id that **no longer exists** in SPEC, or
-  a covered section whose text has **visibly changed** since the plan was written. That's it —
+  a covered section whose text has **visibly changed** since the plan was written. Section matching
+  runs **both ways** along the tree: a change to `§10.3` touches a plan covering `§10`, and a change
+  to `§10` touches a plan covering `§10.3`. That's it —
   **don't reason about whether the change invalidates the plan**; that judgement is Frame's, and
   guessing at it is how you produce a noisy, useless report.
 - If you can't tell, say "possible drift, unverified" rather than either asserting or hiding it.

@@ -5,9 +5,11 @@
 > example rows. **Plan owns the file**; Frame owns only the `stale`/`superseded` rows in it;
 > Implement owns only the `ready` → `done` flip.
 
-**This file is the only place plan status lives.** Plan-file YAML frontmatter carries **identity
-only** (`id`, `group`, `title`, `covers`, `deps`) — no `status`, no `reason` — so there is nothing
-to reconcile and no two-writer conflict.
+**This file is the single source of truth for every mutable fact about a plan** — `status`,
+`reason`, `covers`, `deps`. Plan-file YAML frontmatter carries **bare identity only**: `id`,
+`group`, `title`. Nothing is duplicated between the two, so there is nothing to reconcile and no
+two-writer conflict. (`covers`/`deps` live here rather than in frontmatter because Frame's ripple
+check scans this one table, and Frame must never open a plan file.)
 
 ## Conventions
 
@@ -28,9 +30,16 @@ to reconcile and no two-writer conflict.
     Frame owns numbering and never renumbers, so a plain search for the number finds the section.
   - **Explicit, comma-separated ids only — ranges are NOT legal.** `§10.1–.5` will not match a
     search for `§10.3`. Write `§10.1, §10.2, §10.3, …` or use the parent (below).
-  - **A parent id covers its subsections.** `§10` matches a revision of `§10.3`. So when a plan
-    implements a whole section, `§10` is enough — listing every child as well is redundant.
-    Matching a revised `§X.Y` therefore means: `covers` contains `§X.Y`, **or any ancestor of it**.
+  - **Matching runs in BOTH directions along the tree** — this is the rule the ripple check uses,
+    and getting it one-directional means silent misses:
+    - `covers: §10` matches a revision of `§10.3` (**ancestor** — the plan implements the whole
+      section, so a change to any part of it hits the plan).
+    - `covers: §10.3` matches a revision of `§10` (**descendant** — revising or deleting a parent
+      changes its children too).
+    - Formally: a revised `§A` matches `covers: §B` when `A == B`, or either is a prefix-ancestor of
+      the other. Siblings never match (`§10.2` and `§10.3` are unrelated).
+  - So when a plan implements a whole section, `§10` alone is enough — listing every child is
+    redundant.
   - A plan may cover a section only **partly** — `covers` says "this plan touches §10.2", not
     "§10.2 is finished". Completeness lives in `IMPLEMENTATION_NOTES.md`.
 - **`deps`** — **plan ids** that must be `done` before this one can start. `—` for none.
@@ -68,6 +77,12 @@ One row per plan. A row exists **iff** a plan file exists.
 Add per-plan notes below the table when useful: a link to the plan file, the commit range it
 landed in, or an **accepted deviation** (what the plan said vs. what was built, and why —
 the durable record belongs in `IMPLEMENTATION_NOTES.md`, this is just a pointer).
+
+**Burned ids:** `—`
+
+Ids of **dropped** plans go here. Dropping deletes the row *and* the plan file, which would
+otherwise erase all evidence the id was ever used — and the next planner allocating "the next free
+id" would reuse it. Recording it here is what makes the never-reuse rule enforceable.
 
 ## Backlog — not yet planned
 

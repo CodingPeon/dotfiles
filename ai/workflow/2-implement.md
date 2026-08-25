@@ -19,19 +19,29 @@ If you cannot read them, **STOP** and say so — they carry rules you must obey.
   `ready` → `done`.
 - Never write `blocked`/`available` (derived) or `stale`/`superseded` (Frame's). Don't judge other
   plans' staleness — Status/Plan surface it and Frame decides.
-- `<area>/CONTEXT.md` is **read-only** to you (Frame owns it); the feature's `context/CONTEXT.md` is
-  yours to append to.
+- `<area>/CONTEXT.md` is **read-only** to you (Frame owns it). The feature's `context/CONTEXT.md` is
+  yours to **append** to — and to **correct** where your build proved an existing entry wrong (a
+  trap that no longer applies, a file map that moved). Say in chat what you corrected. Don't
+  restructure it or delete knowledge you merely didn't need.
+- **SPEC boundary:** you may fix a *factual* error your build exposed — a wrong filename, command,
+  or type name — where the intent is unchanged. **Anything that changes the WHAT** (behaviour, a
+  requirement, a rule) is **Frame's**, however small the edit looks. If you're weighing it, it's
+  Frame's.
 
 ## INPUTS
 - **One plan — the user names it.** If they didn't, don't pick for them: read `plans/INDEX.md`,
   list the **available** rows, and ask which. If exactly one is available, propose it and confirm.
+  If what they named **doesn't resolve** to exactly one row (unknown id, typo, ambiguous title),
+  say so, show the candidates, and ask — never pick the nearest match.
 - That plan file (mode-resolved `plans/<id>-<name>.md`) + the cascading context and `context/`
   supplementary material + SPEC/NOTES for the surrounding truth.
 
 ## DETECT (is this plan implementable now?)
+**`plans/INDEX.md` holds every mutable fact** — `status`, `reason`, `covers`, `deps`; plan
+frontmatter is bare identity (`id`, `group`, `title`), so read `deps` from the **row**, not the file.
 **Statuses are mutually exclusive — a row holds exactly one** (`stale` *replaces* `ready`;
-`superseded` *replaces* `done`). Read that stored status from `plans/INDEX.md`, then **compute** the
-rest — no row ever *contains* `blocked` or `available`:
+`superseded` *replaces* `done`). Read that stored status, then **compute** the rest — no row ever
+*contains* `blocked` or `available`:
 
 - row `ready`, all `deps` `done` → **available** → build it.
 - row `ready`, some `deps` entry not `done` → **you computed *blocked*** → **report the blocker and
@@ -43,7 +53,7 @@ rest — no row ever *contains* `blocked` or `available`:
     if the WHAT for it isn't specced yet.
 - row `stale` → invalidated before it was built → **Plan** (rewrite it).
 - row `draft` → not cleared; read its **`reason`** (an INDEX **column** — `reason` is not in plan
-  frontmatter, which is identity-only) → **Frame** or **Plan**, per what it says.
+  frontmatter, which is bare identity) → **Frame** or **Plan**, per what it says.
 - row `done` → already built, plan file frozen → a change needs a **new** plan (**Plan**).
 - row `superseded` → built, then invalidated by a spec change; it stays that way as history → the
   follow-up is a **new** plan (**Plan**), never this one.
@@ -55,9 +65,16 @@ rest — no row ever *contains* `blocked` or `available`:
   **`<area>/CONTEXT.md`** (the generic pattern to fill in). Run type-check / build / unit tests, and
   the harness where the plan says so. Report real results — **never claim green without running
   it**; if a command can't run, say so rather than assuming.
-  - **No runnable commands anywhere in the chain? That blocks closing** — unverified is not green.
-    Report it, ask the user for the commands, and **record them in `<feature>/context/CONTEXT.md`**
-    so the next session doesn't hit the same wall.
+  Three distinct failures — **all three block closing**, since unverified is never green, but they
+  resolve differently:
+  - **No commands exist** anywhere in the chain → ask the user for them, and **record them in
+    `<feature>/context/CONTEXT.md`** so the next session doesn't hit the same wall.
+  - **Commands exist but you can't run them** (sandbox or permission limits, a GUI/harness step, no
+    network) → **ask the user to run them and report back.** Their result counts as verification —
+    note in NOTES that it was user-run. Do not silently treat "couldn't run" as "passed", and don't
+    abandon the plan over it.
+  - **Commands ran and failed** → not verified. Fix the code, or report the failure and stop. Never
+    close on red.
 - Take the user's **inline feedback** and iterate: shallow (bug, plan tweak) → fix here and update
   the plan; deep ("the idea is wrong") → stop and send them to **Frame**.
 - **Deviations require the user's explicit yes — you can never self-authorize one.** "Acceptance is

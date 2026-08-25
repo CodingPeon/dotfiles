@@ -17,13 +17,16 @@ If you cannot read them, **STOP** and say so — they carry rules you must obey.
 ## PHASE-SPECIFIC RULES
 - You may create/modify only **un-executed** plan files (`draft`/`ready`/`stale`). A `done` plan's
   **file content is frozen** — it records what was built. New requirements become **new** plans.
-- **Status lives only in `plans/INDEX.md`.** Plan frontmatter is **identity only** — no `status`,
-  no `reason` — so there is nothing to reconcile and no two-writer conflict.
+- **`plans/INDEX.md` is the single source of truth for every mutable fact:** `status`, `reason`,
+  `covers`, `deps`. Plan frontmatter is **bare identity only** — `id`, `group`, `title`. Nothing is
+  duplicated, so nothing can drift. (`covers`/`deps` live in the INDEX because Frame's ripple check
+  scans that one table and must never open a plan file.)
 - Statuses you **write**: `draft` and `ready`, only. Never `blocked`/`available` (derived), never
   `done` (Implement's), and never **set** `stale`/`superseded` (Frame's).
 - **But you CLEAR `stale`** — rewriting the plan *is* the resolution, so no Frame round-trip: set
   the row back to `ready` (or `draft` + `reason` if still unresolved). Dropping it instead? Delete
-  the row and the file. **Never touch `superseded`** — it's permanent history on built work; its
+  the row and the file, **and add the id to the INDEX's `Burned ids` line** — otherwise nothing
+  records that the id was used and the next planner will reuse it. **Never touch `superseded`** — it's permanent history on built work; its
   resolution is a **new** plan with its own row.
 
 ## INPUTS
@@ -31,23 +34,33 @@ If you cannot read them, **STOP** and say so — they carry rules you must obey.
   `context/` supplementary material.
 
 ## DETECT (what needs planning)
-1. **Locate the confirmed feature's artifacts** per `ARTIFACTS.md`. No manifest for the confirmed
-   feature → nothing is framed for it yet → **Frame**.
+1. **Locate the confirmed feature's artifacts** per `ARTIFACTS.md`.
+   - No manifest for the confirmed feature → nothing is framed for it yet → **Frame**.
+   - Manifest resolves but **SPEC/NOTES are missing at the resolved location** → in `repo` mode they
+     are branch-scoped, so this usually means the work lives on a different branch. **STOP**, say
+     which files are missing, and have the user confirm the branch (or run **Frame** to scaffold).
+     Never plan against a SPEC you couldn't read.
 2. Read `INDEX.md` and open by reporting the landscape: plans grouped by `group`, which are
    **available** (`ready` + all `deps` `done`), which are **blocked**, and anything
-   `draft`/`stale`/`superseded` with its `reason` — plus a recommended next.
+   `draft`/`stale`/`superseded` with its `reason` — plus a recommended next. **Tie-break in this
+   order:** most-depended-on (count how often each id appears in other rows' `deps` — count, don't
+   eyeball), then lowest `id`. Say why in one clause.
 3. Work to do = sub-features with no plan yet · `stale` plans to rewrite · `superseded` items
    needing a "modify built code" plan · or a wave the user asks for.
 
 ## ACTIONS
-- **You bootstrap `plans/INDEX.md`** — if it doesn't exist, copy `index.template.md`, strip its
-  banner and example rows, and fill it in alongside the first plan. Frame owns *rows*, never the file.
+- **You own `plans/INDEX.md` — the file and its rows.** Frame may only set `stale`/`superseded` (+
+  `reason`) on existing rows and touch the Backlog; Implement may only flip `ready` → `done`.
+  Everything else in that file is yours.
+  - **Bootstrap:** if it doesn't exist, copy `index.template.md`, **strip the banner and the example
+    rows but keep the Conventions and Status sections** — an INDEX that documents its own schema is
+    what keeps later sessions consistent — then fill it in alongside the first plan.
 - Author one **plan file per implementable unit** at `plans/<id>-<name>.md` (mode-resolved). A
   sub-feature may be one plan or several — split when it's too big to verify in one go.
-  - **Frontmatter = identity only:** `id`, `group`, `title`, `covers`, `deps`. Semantics and the
-    id/`group` conventions are in `index.template.md` — follow them exactly. `covers` must be **SPEC
-    section ids**, since Frame's ripple check matches on them; anything else silently breaks
-    invalidation detection.
+  - **Frontmatter = bare identity:** `id`, `group`, `title` — nothing else. `covers` and `deps` go
+    in the **INDEX row**, never in the file. Their semantics and the id/`group` conventions are in
+    `index.template.md` — follow them exactly. `covers` must be **SPEC section ids**, since Frame's
+    ripple check matches on them; anything else silently breaks invalidation detection.
   - **Body must have:** **Context** (why) · **Requirements** · **Reusable pieces** with exact
     `file:line` pointers · **Design per file** · **Files to create/modify** · **Verification**
     (exact commands + harness steps) · **Acceptance criteria**.
@@ -55,7 +68,8 @@ If you cannot read them, **STOP** and say so — they carry rules you must obey.
     feature `context/CONTEXT.md` (concrete), then `<area>/CONTEXT.md` (the generic pattern). **If
     you cannot produce runnable commands, do not hand off the plan** — an unrunnable Verification
     section blocks Implement, which may not close without one. Ask the user for them, put them in
-    the plan, and note that they belong in the feature CONTEXT (Frame files them; you don't).
+    the plan. **Don't** route the user to Frame for this — Implement is what records verification
+    commands into the feature CONTEXT, on its close.
   - Cite existing patterns/utilities to reuse (both CONTEXT tiers + the repo) — don't invent new
     code where something fits.
 - **"You do NOT write source files" ≠ prose-only plans.** Plans *should* carry exact commands,
@@ -73,7 +87,9 @@ If you cannot read them, **STOP** and say so — they carry rules you must obey.
   tier — say so, so the next Frame records it there.
 - If the WHAT is unclear or an older spec section needs changing, **don't guess — send it back to
   Frame, durably.** Chat alone isn't a handoff:
-  - set the affected **INDEX row** to `draft` with `reason: needs Frame — <the question>`;
+  - set the affected **INDEX row** to `draft` with `reason: needs Frame — <the question>`.
+    A `reason` is always `<cause> — <detail>`; the two causes you write are `needs Frame — …` and
+    `blocked on verification — <what's missing>`;
   - if no plan exists yet, add the row as `draft` with that reason and stub only the plan file
     (Context + the open question) — do not invent the WHAT;
   - then say it in chat too. The next Frame reads `INDEX.md`, so the question survives the session.
