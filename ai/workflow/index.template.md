@@ -1,9 +1,16 @@
 # INDEX — <feature name>
 
-> **Audience: the Plan phase**, when a feature has no registry yet — copy this to `plans/INDEX.md`
-> at the **mode-resolved** location, alongside the first plan, then delete this banner and the
-> example rows. **Plan owns the file**; Frame owns only the `stale`/`superseded` rows in it;
-> Implement owns only the `ready` → `done` flip.
+> **Audience: every phase.** This file is the **canonical** schema, status vocabulary and
+> conventions for a plan registry — read it whenever you touch one.
+>
+> **Plan** also uses it to create a registry that doesn't exist yet — but takes **only the table
+> structures** (Plans, Burned ids, Backlog) plus a one-line pointer back here. **The Conventions and
+> Status sections below are never copied into a live `INDEX.md`:** every phase already reads this
+> file, so a per-feature copy is only N copies to keep in sync. A registry holds data; the schema
+> lives here.
+>
+> Ownership: **Plan** owns the file; **Frame** owns only the `stale`/`superseded` rows and the
+> Backlog; **Implement** owns only the `ready` → `done` flip.
 
 **This file is the single source of truth for every mutable fact about a plan** — `status`,
 `reason`, `covers`, `deps`. Plan-file YAML frontmatter carries **bare identity only**: `id`,

@@ -52,9 +52,11 @@ If you cannot read them, **STOP** and say so — they carry rules you must obey.
 - **You own `plans/INDEX.md` — the file and its rows.** Frame may only set `stale`/`superseded` (+
   `reason`) on existing rows and touch the Backlog; Implement may only flip `ready` → `done`.
   Everything else in that file is yours.
-  - **Bootstrap:** if it doesn't exist, copy `index.template.md`, **strip the banner and the example
-    rows but keep the Conventions and Status sections** — an INDEX that documents its own schema is
-    what keeps later sessions consistent — then fill it in alongside the first plan.
+  - **Bootstrap:** if it doesn't exist, create it from `index.template.md` — **take the table
+    structures only** (Plans, Burned ids, Backlog). **Do not copy the Conventions or Status
+    sections**: this template is canonical and every phase already reads it, so a per-feature copy
+    is just N copies to drift. Head the new file with a one-line pointer back to the template, then
+    fill in the first plan.
 - Author one **plan file per implementable unit** at `plans/<id>-<name>.md` (mode-resolved). A
   sub-feature may be one plan or several — split when it's too big to verify in one go.
   - **Frontmatter = bare identity:** `id`, `group`, `title` — nothing else. `covers` and `deps` go
