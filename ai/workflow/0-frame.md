@@ -17,7 +17,7 @@ Also yours: **`manifest.template.md`** in this directory, when scaffolding a **n
 
 ## PHASE-SPECIFIC RULES
 - **SPEC is living** — you edit it in place (revise, add, remove sections). Plans are immutable
-  once `done`; you never edit a plan **file**, only `stale`/`superseded` on its INDEX **row**.
+  once `done`; you never edit a plan **file**, only `stale`/`to-be-superseded` on its INDEX **row**.
 - **You are the main author of SPEC and feature context, but not their only writer.** Implement may
   make a *small factual correction* to SPEC, and it appends invariants, traps and verification
   commands to `<feature>/context/CONTEXT.md` — and corrects entries its build disproved. **Read both
@@ -89,7 +89,7 @@ previously-agreed behaviour **wrong**:
 
 **Deleting a section is the strongest contradiction there is** — the work is no longer wanted at
 all, so the check always fires for every plan covering it. Pending → `stale` (Plan rewrites or
-drops); `done` → `superseded` (a new plan removes or reworks the built code). The dangling `covers`
+drops); `done` → `to-be-superseded` (a follow-up removes or reworks the built code). The dangling `covers`
 id is **left as-is** on a frozen `done` plan — it's the historical record of what that plan
 addressed; only pending plans get their `covers` rewritten.
 
@@ -98,14 +98,22 @@ Only if **yes** — find every plan whose `covers:` includes that section in `pl
 file (statuses are mutually exclusive — one per row):
 - covering plan is *pending* (`draft`/`ready`) → set `stale` + a `reason`. Plan rewrites or drops
   it; no code is affected. **Plan clears it** by rewriting — you don't revisit it.
-- covering plan is `done` → set `superseded` + a `reason` **that names the follow-up** (e.g.
-  `§7.2 revised — chain replaced by always-swap; needs a new plan`), and say it in chat. That
-  `reason` *is* the durable trace — a Backlog entry as well is optional, not required.
-  `superseded` *replaces* `done` and is **permanent history**; the plan file stays frozen as the
-  record of what was built.
+- covering plan is `done` → set **`to-be-superseded`** + a `reason` saying **what changed and what
+  still stands** (e.g. `§7.2 revised — chain replaced by always-swap; its §7.1 work stands`), and say
+  it in chat. It *replaces* `done`, and the plan file stays frozen as the record of what was built.
+  - **You do not decide the follow-up.** `to-be-superseded` means "contradicted, resolution not yet
+    decided" — **Plan** resolves it (a replacement plan, or a deferral to Backlog) and is the phase
+    that moves it on to `superseded`. Never write `superseded` yourself.
+  - Scoping what still stands is the most valuable thing you can put in that `reason`: it's what
+    stops Plan re-planning behaviour that never changed.
 
-When in doubt, **don't flag** — say so and ask. A wrong `superseded` invents work; a miss surfaces
-at the next planning session.
+**Correcting your own mis-flag.** If you later find the spec never actually contradicted the work —
+the revision touched wording or rationale, or the built code already satisfies the new text — return
+the row to **`done`** and say why. That is the **only** way a row leaves `to-be-superseded` other
+than Plan resolving it, and it never applies to a `superseded` row.
+
+When in doubt, **don't flag** — say so and ask. A wrong flag invents work; a miss surfaces at the
+next planning session.
 
 **If `plans/INDEX.md` doesn't exist there is nothing to flag** — no INDEX means no plans, and a
 ripple can only invalidate a plan that exists. **Never create the file**; Plan bootstraps it. You
@@ -115,7 +123,8 @@ own *rows*, not the file.
 - **SPEC** at its mode-resolved path — the agreed WHAT, with `§` ids.
 - `<feature>/context/CONTEXT.md`, and `<area>/CONTEXT.md` only for facts already on `origin/main`.
 - `manifest.md` — new features, or filling an empty/placeholder `repo-remote`.
-- `plans/INDEX.md` — `stale`/`superseded` + `reason`, **only** if the ripple check fired. You may
+- `plans/INDEX.md` — `stale`/`to-be-superseded` + `reason`, **only** if the ripple check fired (plus
+  returning a mis-flagged row to `done`). **Never write `superseded`** — that's Plan's. You may
   also add a **Backlog** entry for something you just specced but aren't planning, or amend/remove
   one whose spec basis you changed. Backlog entries carry **no status**, so a ripple that lands on
   one is handled by editing the entry, not by flagging it.

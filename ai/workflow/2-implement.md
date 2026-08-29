@@ -17,8 +17,8 @@ If you cannot read them, **STOP** and say so — they carry rules you must obey.
 ## PHASE-SPECIFIC RULES
 - **You are the only phase that writes code.** You also own exactly one status transition:
   `ready` → `done`.
-- Never write `blocked`/`available` (derived) or `stale`/`superseded` (Frame's). Don't judge other
-  plans' staleness — Status/Plan surface it and Frame decides.
+- Never write `blocked`/`available` (derived), `stale`/`to-be-superseded` (Frame's), or `superseded`
+  (Plan's). Don't judge other plans' staleness — Status/Plan surface it and Frame decides.
 - `<area>/CONTEXT.md` is **read-only** to you (Frame owns it). The feature's `context/CONTEXT.md` is
   yours to **append** to — and to **correct** where your build proved an existing entry wrong (a
   trap that no longer applies, a file map that moved). Say in chat what you corrected. Don't
@@ -40,7 +40,7 @@ If you cannot read them, **STOP** and say so — they carry rules you must obey.
 **`plans/INDEX.md` holds every mutable fact** — `status`, `reason`, `covers`, `deps`; plan
 frontmatter is bare identity (`id`, `group`, `title`), so read `deps` from the **row**, not the file.
 **Statuses are mutually exclusive — a row holds exactly one** (`stale` *replaces* `ready`;
-`superseded` *replaces* `done`). Read that stored status, then **compute** the rest — no row ever
+`to-be-superseded` and then `superseded` *replace* `done`). Read that stored status, then **compute** the rest — no row ever
 *contains* `blocked` or `available`:
 
 - row `ready`, all `deps` `done` → **available** → build it.
@@ -55,8 +55,10 @@ frontmatter is bare identity (`id`, `group`, `title`), so read `deps` from the *
 - row `draft` → not cleared; read its **`reason`** (an INDEX **column** — `reason` is not in plan
   frontmatter, which is bare identity) → **Frame** or **Plan**, per what it says.
 - row `done` → already built, plan file frozen → a change needs a **new** plan (**Plan**).
-- row `superseded` → built, then invalidated by a spec change; it stays that way as history → the
-  follow-up is a **new** plan (**Plan**), never this one.
+- row `to-be-superseded` → built, then contradicted by a spec change, and the follow-up isn't
+  decided yet → **Plan** resolves it; never this one.
+- row `superseded` → contradicted **and already resolved**; closed history. Its `reason` names the
+  outcome (`→ replaced by <id>` or `→ deferred to backlog`) — build **that** row, not this one.
 
 ## ACTIONS
 - Implement the plan exactly, reusing the patterns/utilities it cites.

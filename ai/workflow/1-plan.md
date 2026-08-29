@@ -21,13 +21,24 @@ If you cannot read them, **STOP** and say so — they carry rules you must obey.
   `covers`, `deps`. Plan frontmatter is **bare identity only** — `id`, `group`, `title`. Nothing is
   duplicated, so nothing can drift. (`covers`/`deps` live in the INDEX because Frame's ripple check
   scans that one table and must never open a plan file.)
-- Statuses you **write**: `draft` and `ready`, only. Never `blocked`/`available` (derived), never
-  `done` (Implement's), and never **set** `stale`/`superseded` (Frame's).
-- **But you CLEAR `stale`** — rewriting the plan *is* the resolution, so no Frame round-trip: set
-  the row back to `ready` (or `draft` + `reason` if still unresolved). Dropping it instead? Delete
-  the row and the file, **and add the id to the INDEX's `Burned ids` line** — otherwise nothing
-  records that the id was used and the next planner will reuse it. **Never touch `superseded`** — it's permanent history on built work; its
-  resolution is a **new** plan with its own row.
+- Statuses you **write**: `draft`, `ready`, and `superseded` (only as the resolution below). Never
+  `blocked`/`available` (derived), never `done` (Implement's), and never **set** `stale` or
+  `to-be-superseded` (Frame's).
+- **You CLEAR both of Frame's flags — that's your job, not a round-trip back to Frame:**
+  - **`stale`** (pending work invalidated): rewrite the plan → set the row back to `ready` (or
+    `draft` + `reason` if still unresolved). Dropping it instead? Delete the row and the file, **and
+    add the id to the INDEX's `Burned ids` line** — otherwise nothing records that the id was used
+    and the next planner will reuse it.
+  - **`to-be-superseded`** (built work contradicted, follow-up undecided): **this is your work
+    list.** Resolve each one, set the row to **`superseded`**, and append the outcome to its
+    `reason`:
+    - wrote a replacement (or removal) plan → `→ replaced by <id>[, <id>…]`
+    - deferring it → `→ deferred to backlog`, and add the Backlog entry
+    Frame's `reason` often scopes **what still stands** — honour that and don't re-plan behaviour
+    that never changed.
+- **`superseded` is permanent — never touch a row already carrying it.** Not to revert it once the
+  replacement ships (that's the system working; reverting erases the record), and not to re-resolve
+  it. Only Frame may undo a **mis-flag**, and only from `to-be-superseded`, never from `superseded`.
 
 ## INPUTS
 - SPEC + NOTES + `plans/INDEX.md` at their mode-resolved location, plus the cascading context and
@@ -45,8 +56,9 @@ If you cannot read them, **STOP** and say so — they carry rules you must obey.
    `draft`/`stale`/`superseded` with its `reason` — plus a recommended next. **Tie-break in this
    order:** most-depended-on (count how often each id appears in other rows' `deps` — count, don't
    eyeball), then lowest `id`. Say why in one clause.
-3. Work to do = sub-features with no plan yet · `stale` plans to rewrite · `superseded` items
-   needing a "modify built code" plan · or a wave the user asks for.
+3. Work to do = sub-features with no plan yet · `stale` plans to rewrite · **`to-be-superseded`
+   rows to resolve** (replace or defer — these are outstanding by definition; a `superseded` row is
+   already closed and needs nothing) · or a wave the user asks for.
 
 ## ACTIONS
 - **You own `plans/INDEX.md` — the file and its rows.** Frame may only set `stale`/`superseded` (+
@@ -98,8 +110,8 @@ If you cannot read them, **STOP** and say so — they carry rules you must obey.
 
 ## OUTPUTS (the only files you write)
 - `plans/*.md` — **un-executed only**; never a `done` plan.
-- `plans/INDEX.md` — the file itself (you bootstrap it), `draft`/`ready` rows (plus **clearing** an
-  existing `stale`, per above), and **the Backlog table**: add entries for work you've identified but
+- `plans/INDEX.md` — the file itself (you bootstrap it), `draft`/`ready` rows, **clearing** Frame's
+  flags (`stale` → `ready`; `to-be-superseded` → `superseded` + outcome), and **the Backlog table**: add entries for work you've identified but
   aren't planning yet, and remove an entry when it becomes a plan. `draft` **requires** a `reason`.
 
 **You never write:** source files · SPEC / `CONTEXT.md` (Frame owns) · NOTES (Implement owns) ·

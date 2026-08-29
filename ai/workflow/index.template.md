@@ -50,7 +50,9 @@ check scans this one table, and Frame must never open a plan file.)
   - A plan may cover a section only **partly** — `covers` says "this plan touches §10.2", not
     "§10.2 is finished". Completeness lives in `IMPLEMENTATION_NOTES.md`.
 - **`deps`** — **plan ids** that must be `done` before this one can start. `—` for none.
-- **`reason`** — **required** whenever status is `draft`, `stale`, or `superseded`; `—` otherwise.
+- **`reason`** — **required** whenever status is `draft`, `stale`, `to-be-superseded` or
+  `superseded`; `—` otherwise. It carries *history and detail*; **actionability is the status's
+  job**, never something a reader has to infer from this prose.
 
 ### Status — stored here, exactly one writer each
 
@@ -60,10 +62,26 @@ check scans this one table, and Frame must never open a plan file.)
 | `ready` | cleared for Implement | Plan |
 | `done` | built and accepted; the plan **file** is frozen | Implement |
 | `stale` | a *pending* plan a spec change invalidated → rewrite or drop | **set** by Frame; **cleared** by Plan (the rewrite *is* the resolution → back to `ready`) |
-| `superseded` | built, then its spec section was revised to contradict what it built | **Frame only, permanent** — it replaces `done`, recording work that was built then invalidated; the resolution is a **new** plan with its own row |
+| `to-be-superseded` | built work a spec revision **contradicted**; the follow-up is not decided yet → **outstanding, Plan must resolve it** | **set** by Frame; **cleared** by Plan → `superseded` |
+| `superseded` | built, contradicted, **and resolved** — closed history | **set by Plan** when it resolves a `to-be-superseded` row. **Permanent** thereafter |
 
 **Statuses are mutually exclusive — a row holds exactly one.** `stale` *replaces* `ready`;
-`superseded` *replaces* `done`.
+`to-be-superseded` and then `superseded` *replace* `done`.
+
+**The two flags are symmetric — Frame flags, Plan clears:**
+- `stale` → Plan rewrites the plan → **`ready`** (the plan lives again).
+- `to-be-superseded` → Plan resolves it → **`superseded`** (the plan stays dead; history closes).
+
+**Resolving a `to-be-superseded` row** — Plan picks exactly one, sets `superseded`, and appends the
+outcome to `reason`:
+- a replacement (or removal) plan is written → `→ replaced by <id>[, <id>…]`
+- the work is deferred → `→ deferred to backlog` (and Plan adds the Backlog entry)
+
+**`superseded` is permanent — never revert it.** Not when the replacement ships (that's the system
+working; reverting would erase the record). The **only** correction is Frame undoing its own
+mis-flag: if the spec never actually contradicted the work, Frame returns the row to `done` and says
+why. Distinguishing the two is easy — *"we built the follow-up"* versus *"there was nothing to
+follow up"*.
 
 **Derived, never stored** — compute at report time, because a stored value lies the moment a
 dependency completes:

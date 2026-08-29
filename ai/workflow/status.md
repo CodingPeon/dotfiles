@@ -29,8 +29,13 @@ If you cannot read them, **STOP** and say so.
 **Statuses are mutually exclusive — a row holds exactly one:**
 `draft` (not cleared for Implement; carries a `reason`) · `ready` (cleared) · `done` (built and
 accepted; plan file frozen) · `stale` (*replaces* `ready` — a pending plan a spec change
-invalidated → Plan) · `superseded` (*replaces* `done` — built, then its spec section was revised to
-contradict it → needs a **new** plan).
+invalidated → **Plan**) · `to-be-superseded` (*replaces* `done` — built work a spec revision
+contradicted, follow-up **not yet decided** → **outstanding, Plan resolves it**) · `superseded`
+(contradicted **and resolved** — closed history, needs nothing; its `reason` says whether it was
+`→ replaced by <id>` or `→ deferred to backlog`).
+
+**Only `to-be-superseded` is outstanding.** Never report a `superseded` row as needing attention —
+that's the noise this split exists to remove.
 
 **Derived, never stored — compute these yourself:**
 - **available** = `ready` AND every `deps` entry is `done`.
@@ -62,8 +67,10 @@ may have work in the tree they haven't committed. Read-only observation, no acti
      the most work). Count them; don't eyeball it.
   2. Then the lowest `id` (plans within a group are numbered in intended order).
   Say *why* you recommended it in one clause, so the user can disagree cheaply.
-- Note anything `stale`/`superseded`/`draft` and which phase clears it (Plan for `stale`; Frame then
-  Plan for `superseded`; read the `reason` for `draft`).
+- Note anything `stale`/`to-be-superseded`/`draft` and which phase clears it — **Plan for all
+  three**: `stale` → rewrite → `ready`; `to-be-superseded` → replace or defer → `superseded`;
+  `draft` → read its `reason` (it may say `needs Frame`). Leave `superseded` rows out of the
+  needs-attention list entirely.
 
 ## OUTPUTS
 - A concise status report **in chat only**.
