@@ -25,7 +25,14 @@ vim.o.expandtab=true -- Use soft tabs
 vim.o.tabstop=4 -- Number of spaces for Tab
 vim.o.softtabstop=4 -- Number of spaces when editing with Tab or BS
 vim.o.shiftwidth=4 -- Number of spaces for each (auto)indent step
-vim.o.textwidth=99 -- Maximum width to break line at
+-- vim.o.textwidth=99 -- Maximum width to break line at
+vim.o.textwidth = 0 -- no auto line-break by default
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "python",
+  callback = function()
+    vim.opt_local.textwidth = 99
+  end,
+})
 vim.opt.wrap=false -- Do not wrap lines longer than screen size
 -- vim.o.backspace=indent,eol,start -- Allow backspacing on everything in insert mode
 vim.o.number=true -- Show line number on first column
