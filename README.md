@@ -22,3 +22,8 @@ Different agent requires different file extension. remember to change the extens
 the symlink
 - Claude uses .md
 - Cursor uses .mdc
+
+## useful skills
+https://github.com/mattpocock/skills
+https://github.com/DietrichGebert/ponytail/tree/main
+https://github.com/JuliusBrussee/caveman/blob/main/skills/caveman/SKILL.md
