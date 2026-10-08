@@ -9,6 +9,8 @@ description of artifact locations; your phase file adds only its own job on top.
   human-chosen label, never derived. Usually one per project repo, but **a monorepo may host
   several under one remote**.
 - **`<feature>`** — one body of work you frame as a unit. It's the key to everything below.
+- **SPEC** / **NOTES** — shorthand for `SPEC.md` and `IMPLEMENTATION_NOTES.md`, used throughout.
+- **pending** — a plan that exists but isn't built: status `draft` or `ready`.
 - **`<workspace>`** — `~/agile_dotfiles/ai/workflow_artifacts/<area>/<feature>/`
 - **`<artifacts-root>`** — a repo-relative directory named in the feature's `manifest.md`
   (`repo` mode only), e.g. `extensions/examples/<ext>/documentation`.

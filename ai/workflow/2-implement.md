@@ -58,7 +58,9 @@ frontmatter is bare identity (`id`, `group`, `title`), so read `deps` from the *
 - row `to-be-superseded` → built, then contradicted by a spec change, and the follow-up isn't
   decided yet → **Plan** resolves it; never this one.
 - row `superseded` → contradicted **and already resolved**; closed history. Its `reason` names the
-  outcome (`→ replaced by <id>` or `→ deferred to backlog`) — build **that** row, not this one.
+  outcome: `→ replaced by <id>` points at the row that took over — **re-run these same checks on that
+  row** and build it only if it comes out available; `→ deferred to backlog` points at no row at all,
+  so there is nothing to build → **Plan**.
 
 ## ACTIONS
 - Implement the plan exactly, reusing the patterns/utilities it cites.
@@ -115,13 +117,14 @@ frontmatter is bare identity (`id`, `group`, `title`), so read `deps` from the *
    on the plan file is invisible. State any **partial coverage** here too.
    - Deviation changed the **WHAT**? The SPEC needs updating too — do it if it's a small factual
      correction, otherwise flag it for **Frame**.
-   - A trap someone could repeat? Add it to `<feature>/context/CONTEXT.md`.
 2. **Plan file, last chance:** optionally add a one-line deviation cross-reference for audit. Nothing
    may touch this file after the next step.
 3. **Flip this plan's `INDEX.md` row to `done`** — the one status transition you own. The plan file
    is now frozen.
-4. Record any **new durable invariant, convention or trap** in `<feature>/context/CONTEXT.md` —
-   that's what saves the next session from re-deriving it.
+4. Add a note to `<feature>/context/CONTEXT.md` only if the build revealed a rule that holds
+   generally across the feature — not only for the specific thing you built. State it as a rule,
+   present tense. If it's only true for the specific thing you built, it belongs in
+   `IMPLEMENTATION_NOTES.md`, not here.
 5. **STOP and tell the user** what to review, naming the paths:
    - **`repo` mode** — the code *and* the SPEC/NOTES/INDEX/context edits are all uncommitted
      working-tree changes in the project repo, for them to `git diff` and commit.
@@ -134,8 +137,8 @@ frontmatter is bare identity (`id`, `group`, `title`), so read `deps` from the *
 - **NOTES** (mode-resolved) — what exists now, including user-accepted deviations and any partial
   coverage.
 - **`plans/INDEX.md`** — this plan's row → `done`.
-- **`<feature>/context/CONTEXT.md`** — new invariants/conventions/traps; verification commands if
-  the chain had none.
+- **`<feature>/context/CONTEXT.md`** — a rule that holds generally across the feature, if the build
+  revealed one; verification commands if the chain had none.
 - Optionally the plan file — a one-line deviation cross-reference, **written before** you flip the
   row to `done` (that flip freezes it).
 - SPEC only for a small factual correction the build proved necessary; anything larger → **Frame**.

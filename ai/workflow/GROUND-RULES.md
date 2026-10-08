@@ -6,6 +6,9 @@ stricter, the stricter rule wins.
 
 ## 1. Startup gate — confirm both with the user before anything else; **STOP** if either fails
 
+*Reading the files listed in §3 is exempt* — do that first. "Before anything else" means before
+touching a **feature's** artifacts, and before any write.
+
 1. **Feature.** Ask which feature this session is for. The branch name and working tree are
    **hints, never authority** — confirm, don't infer. It decides where every artifact lives.
 2. **Branch.** Report `git branch --show-current` and have the user confirm it's the right branch
@@ -36,11 +39,19 @@ commits. Never `fetch` either: it mutates refs.
 - **Your phase file** — your job. Authoritative for what you produce.
 - **`ARTIFACTS.md`** — where artifacts live and how to resolve them.
 - **This file** — shared conduct.
-- **`index.template.md`** — canonical INDEX schema + status model (read whenever you touch the
-  registry; Plan also copies it to bootstrap a feature that has none).
+- **`index.template.md`** — canonical INDEX schema, status model and column forms. **Every phase
+  reads it**, the read-only ones included. Plan additionally takes its *skeleton* — table headers
+  only, no prose — to bootstrap a feature that has none.
 - **`manifest.template.md`** — only when Frame scaffolds a **new** feature.
+
+**That list is exhaustive — anything not on it, you don't read:**
+
+- **Not another phase's file** — yours is the only one. Another phase's file grants writes you don't
+  have. Route the user to a phase **by name**; never open its file to do so.
 - **Not `README.md`** — it's human-facing (which phase to invoke, routing between phases) and
   irrelevant to your job.
+- **Not `AUTHORING-RULES.md`** — it governs *editing the workflow files themselves*, which is not a
+  phase. Reading it as workflow rules would misdirect your session.
 
 ## 4. Stay in your lane
 

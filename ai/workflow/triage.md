@@ -21,7 +21,8 @@ If you cannot read them, **STOP** and say so.
   Your entire output is a verdict plus a brief, in chat.
 - **You never decide the WHAT.** Judging whether specified behaviour is *desirable* is Frame's job;
   you only report whether the code matches what the spec already says.
-- Never set `stale`/`superseded`, even if you're sure. Name the plan id and let Frame decide.
+- Never set `stale`/`to-be-superseded`/`superseded`, even if you're sure. Name the plan id and let
+  Frame decide.
 
 ## INPUTS
 - The user's description of the observed behaviour (ask for repro steps if they're missing —
@@ -65,8 +66,10 @@ described behaviour, or needs new tests. **If the fix would require editing SPEC
 it is not trivial** — that's a behaviour change, so route it to **Plan**.
 
 ### The lanes — these four, and nothing else
-- **none** — verdict 1. Nothing to do. (If the user wants it changed anyway: **Frame** for a
-  deviation or trap, a **Backlog** entry for an unbuilt follow-up.)
+- **none** — verdict 1. Nothing to do. (If the user wants it changed anyway, the lane becomes
+  **Frame** for a deviation or trap, or **Plan** for an unbuilt follow-up — Plan is the phase that
+  turns one into a plan or a Backlog entry. **"Backlog" is not a lane**: you write nothing, so you
+  can never be the one to record it.)
 - **outside the workflow** — a *trivial* bug. **Not a phase.** The phases are for planned work, and
   Implement builds an existing plan row, so it has no entry point for an unplanned one-liner. This
   gets fixed by the user, or by an ordinary session that isn't running a phase file at all — and
@@ -77,8 +80,9 @@ it is not trivial** — that's a behaviour change, so route it to **Plan**.
 
 A trivial bug usually needs **no artifact update at all**: the fix makes the code do what NOTES
 already claims, so the docs were right the whole time. Say so explicitly when you recommend this
-lane, and note the one exception — if the bug taught something durable (a trap, an invariant), that
-belongs in `<feature>/context/CONTEXT.md`, which is Implement's to write, not the fixer's.
+lane, and note the one exception — if the bug taught something durable (a trap, an invariant), it
+belongs in `<feature>/context/CONTEXT.md`. **Say that in your brief and tell the user to record it**,
+since an out-of-workflow fix runs no phase and so has no writer for that file.
 
 **If you can't tell, say so and recommend Frame.** Never present a guess as a verdict. Frame is the
 safe default: it writes no code, and diagnosis is its opening move.

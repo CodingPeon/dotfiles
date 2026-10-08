@@ -22,7 +22,7 @@ from the same directory, resolves the artifacts, and does its one job.
 | `triage.md` | diagnose a *problem*: bug / spec wrong / not-a-defect, + a handoff brief — **anytime**, writes nothing | you drag it |
 | **`GROUND-RULES.md`** | startup gate · git policy · what to read · stay in your lane | every phase |
 | **`ARTIFACTS.md`** | vocabulary · locating the feature · modes · layouts · context cascade | every phase |
-| **`index.template.md`** | INDEX schema + status model (**canonical**) | Plan; Implement/Status as needed |
+| **`index.template.md`** | INDEX schema · status model · the `reason` and `why not yet` forms (**canonical**) | every phase |
 | **`manifest.template.md`** | manifest skeleton | Frame, for a new feature |
 
 Each rule has **exactly one home**. Phases reference rather than restate, so a convention change is
@@ -101,7 +101,8 @@ plan is `done` lies the moment you check out a branch without that work. (Ration
 |---|---|
 | the gate, git policy, conduct | `GROUND-RULES.md` |
 | artifact locations, modes, layouts, cascade | `ARTIFACTS.md` |
-| INDEX columns, status vocabulary/ownership | `index.template.md` |
+| INDEX columns, status vocabulary/ownership, **`reason` and `why not yet` forms** | `index.template.md` |
+| **what Frame must hand off** (the coverage sweep) | `0-frame.md` |
 | manifest fields | `manifest.template.md` |
 | a phase's job, inputs, or outputs | that phase file |
 | this map | here |

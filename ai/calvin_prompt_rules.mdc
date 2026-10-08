@@ -3,7 +3,10 @@ description: Extra rules setup by users
 globs: 
 alwaysApply: true
 ---
-- Explanation must be concise. Each point or concept is limited to 3 sentences.
+- Use always /caveman skill when replying to the user
+- Explanation must be concise.
+  - Explain in layman term and higher abstraction first.
+    - Only go into details when the users prompt
   - Use point form if the explaination requires more than 3 sentences.
   - Explain through diagrams when possible.
 - Mention if the solution deviates from best practice

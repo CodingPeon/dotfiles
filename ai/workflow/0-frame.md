@@ -47,11 +47,15 @@ Also yours: **`manifest.template.md`** in this directory, when scaffolding a **n
   an uncommitted working-tree diff, which *is* the pending state — if the user abandons the work
   they discard it with git. There is no separate draft to keep in sync.
 - **You own section numbering.** Assign/confirm `§` ids so Plan can key `covers:` off stable ids.
-  Reuse an id when revising; allocate the next free sub-number for additions. **Never renumber** —
+  Reuse an id when revising; for additions allocate the next free sub-number — **free means unused by
+  a present section *and* not listed in the burned-ids comment** (below). **Never renumber** —
   `covers:` entries across every plan point at these ids.
   - **A deleted section's id is burned — never reuse it for different content.** Frozen `done` plans
     keep the dangling `covers` id as their historical record; reusing the number would silently
     re-point that record at unrelated work and make future ripple checks match the wrong plans.
+    - **Record it** in a one-line `<!-- burned §ids: 7.3, 9 -->` comment at the foot of SPEC, or the
+      hole it leaves gets reused. This is **not** the INDEX's `Burned ids` line, which holds only
+      *plan* ids.
 - **File durable facts into the right tier** (see the cascade in `ARTIFACTS.md`): feature-specific →
   `context/CONTEXT.md`; repo-wide **and already on `origin/main`** → `<area>/CONTEXT.md`. When in
   doubt, leave it in feature context.
@@ -89,28 +93,30 @@ previously-agreed behaviour **wrong**:
 
 **Deleting a section is the strongest contradiction there is** — the work is no longer wanted at
 all, so the check always fires for every plan covering it. Pending → `stale` (Plan rewrites or
-drops); `done` → `to-be-superseded` (a follow-up removes or reworks the built code). The dangling `covers`
-id is **left as-is** on a frozen `done` plan — it's the historical record of what that plan
-addressed; only pending plans get their `covers` rewritten.
+drops); `done` → `to-be-superseded` (a follow-up removes or reworks the built code). The dangling
+`covers` id is **left as-is** on a frozen `done` plan — it's the historical record of what that plan
+addressed. A *pending* plan's `covers` may need rewriting, but **that is Plan's edit, not yours** —
+`covers` is not a column you may ever write.
 
-Only if **yes** — find every plan whose `covers:` includes that section in `plans/INDEX.md`.
+Only if **yes** — find every plan whose `covers:` includes that section. **"Includes" is not string
+equality:** match **both ways along the tree** per `index.template.md`, or you miss silently.
 **You are the only phase that may set these two**, and only on the **INDEX row**, never in the plan
 file (statuses are mutually exclusive — one per row):
-- covering plan is *pending* (`draft`/`ready`) → set `stale` + a `reason`. Plan rewrites or drops
-  it; no code is affected. **Plan clears it** by rewriting — you don't revisit it.
-- covering plan is `done` → set **`to-be-superseded`** + a `reason` saying **what changed and what
-  still stands** (e.g. `§7.2 revised — chain replaced by always-swap; its §7.1 work stands`), and say
-  it in chat. It *replaces* `done`, and the plan file stays frozen as the record of what was built.
+- covering plan is *pending* → set `stale` + a `reason`. Plan rewrites or drops it; you don't revisit.
+- covering plan is `done` → set **`to-be-superseded`** + a `reason` in the mandatory form from
+  `index.template.md`, and say it in chat. It *replaces* `done`; the plan file stays frozen.
+  - **That `reason` is the entire brief for the replacement plan** — Plan resolves the row in a fresh
+    session with nothing but SPEC, NOTES and this table. Write it for a reader who has your spec edit
+    but not your reasoning.
   - **You do not decide the follow-up.** `to-be-superseded` means "contradicted, resolution not yet
     decided" — **Plan** resolves it (a replacement plan, or a deferral to Backlog) and is the phase
     that moves it on to `superseded`. Never write `superseded` yourself.
-  - Scoping what still stands is the most valuable thing you can put in that `reason`: it's what
-    stops Plan re-planning behaviour that never changed.
 
 **Correcting your own mis-flag.** If you later find the spec never actually contradicted the work —
 the revision touched wording or rationale, or the built code already satisfies the new text — return
-the row to **`done`** and say why. That is the **only** way a row leaves `to-be-superseded` other
-than Plan resolving it, and it never applies to a `superseded` row.
+the row to what it held before (**`done`** for a `to-be-superseded` row, **`ready`** for a `stale`
+one), clear the `reason` to `—`, and say why. Undoing your own flag is the **only** way a row leaves
+`to-be-superseded` other than Plan resolving it, and it never applies to a `superseded` row.
 
 When in doubt, **don't flag** — say so and ask. A wrong flag invents work; a miss surfaces at the
 next planning session.
@@ -119,18 +125,48 @@ next planning session.
 ripple can only invalidate a plan that exists. **Never create the file**; Plan bootstraps it. You
 own *rows*, not the file.
 
+### The coverage sweep — do this before you close, every session
+
+Before you close, **take every numbered SPEC section you added, revised or deleted, and account for
+it** (`index.template.md` defines what counts as covered):
+
+| the section is `covers`ed by… | then |
+|---|---|
+| a covering row, or a Backlog entry your edit didn't invalidate | nothing to do — that *is* the handoff |
+| a Backlog entry your edit invalidated | amend it, or delete it if the work is gone |
+| **nothing** | **add a Backlog entry** (`—` for `group` unless one obviously fits; `unplanned` unless something genuinely blocks planning) |
+
+The last case is **not a judgement call, and it is the one that gets skipped.** Write the entry
+whatever is expected to happen next.
+
+**A deleted section needs this too**, and it's the easiest to miss: the ripple check flags its
+*plans*, but a Backlog entry pointing at it must be deleted by hand.
+
+**No INDEX file yet?** Nothing to sweep into — say so in chat. Plan seeds the Backlog from the whole
+SPEC when it bootstraps the file.
+
 ## OUTPUTS (the only files you write)
 - **SPEC** at its mode-resolved path — the agreed WHAT, with `§` ids.
-- `<feature>/context/CONTEXT.md`, and `<area>/CONTEXT.md` only for facts already on `origin/main`.
+- `<feature>/context/CONTEXT.md`; and `<area>/CONTEXT.md` **only** for facts that are both
+  **repo-wide** and **already on `origin/main`** (both conditions — see the graduation rule above).
 - `manifest.md` — new features, or filling an empty/placeholder `repo-remote`.
-- `plans/INDEX.md` — `stale`/`to-be-superseded` + `reason`, **only** if the ripple check fired (plus
-  returning a mis-flagged row to `done`). **Never write `superseded`** — that's Plan's. You may
-  also add a **Backlog** entry for something you just specced but aren't planning, or amend/remove
-  one whose spec basis you changed. Backlog entries carry **no status**, so a ripple that lands on
-  one is handled by editing the entry, not by flagging it.
+- **Rows and entries inside `plans/INDEX.md` — never the file itself** (Plan bootstraps it; if it
+  doesn't exist, you write nothing there). Two kinds, both row-level:
+  - `stale`/`to-be-superseded` + `reason`, **only** if the ripple check fired (plus returning a
+    mis-flagged row to `done`/`ready`). **Never write `superseded`** — that's Plan's. **On a Plans row
+    those two columns are the only ones you may touch** — not `id`, `group`, `title`, `covers` or
+    `deps`. (Backlog entries are different: there you fill every column, below.)
+  - **Backlog entries — required** by the coverage sweep above for every section you specced that no
+    covering row covers; plus amending or removing one your edit invalidated. Backlog entries carry
+    **no status**, so a ripple that lands on one is handled by editing the entry, not by flagging it.
 
 **You never write:** code · `plans/*.md` (Plan owns) · NOTES (Implement owns; read-only here) ·
 any git state.
 
-End by telling the user the agreed WHAT is captured, where it landed (an uncommitted diff, in `repo`
-mode), what you flagged, and whether to go to **Plan** next.
+## CLOSE — account for the handoff, don't just summarise
+End with, in this order:
+1. the agreed WHAT and where it landed (an uncommitted diff, in `repo` mode);
+2. **the coverage sweep result — one line per section you touched, saying where it's accounted for**
+   (covered by plan `<id>` · flagged `stale`/`to-be-superseded` · **new Backlog entry**);
+3. **anything you could not record**, and why;
+4. whether to go to **Plan** next.

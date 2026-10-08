@@ -67,11 +67,22 @@ may have work in the tree they haven't committed. Read-only observation, no acti
      the most work). Count them; don't eyeball it.
   2. Then the lowest `id` (plans within a group are numbered in intended order).
   Say *why* you recommended it in one clause, so the user can disagree cheaply.
-- Note anything `stale`/`to-be-superseded`/`draft` and which phase clears it — **Plan for all
-  three**: `stale` → rewrite → `ready`; `to-be-superseded` → replace or defer → `superseded`;
-  `draft` → read its `reason` (it may say `needs Frame`). Leave `superseded` rows out of the
-  needs-attention list entirely.
+- Note anything `stale`/`to-be-superseded`/`draft`, **with its `reason`**, and which phase clears it
+  — **Plan for all three**: `stale` → rewrite → `ready`; `to-be-superseded` → replace or defer →
+  `superseded`; `draft` → its `reason` may say `needs Frame`. The `reason` is what sizes the work: a
+  `to-be-superseded` row's `still stands` separates a small removal from a full rewrite. Leave
+  `superseded` rows out of the needs-attention list entirely.
+- **Report the Backlog too — it's the unplanned half of the work list.** For each entry give its
+  `covers` and its `why not yet`, and split them: `unplanned` entries are **plannable now** →
+  **Plan**; `needs decision — …` → **Frame**; the rest are parked, so list them without recommending
+  anything. An empty Plans table with a populated Backlog is a normal, informative state, not an
+  error.
+- **Note unrecorded SPEC sections** — a section that appears in **neither** table's `covers`. Frame is
+  supposed to leave a Backlog entry for anything it specced and didn't get planned, so a gap here
+  means a Frame session under-recorded. Report it as a gap and recommend **Plan** (it resolves gaps
+  with the user) — **never guess whether it's wanted**; that's the same judgement call you're barred
+  from making about drift.
 
 ## OUTPUTS
 - A concise status report **in chat only**.
-- End with: "Available: … · Recommended next: … · Needs Plan/Frame: …".
+- End with: "Available: … · Recommended next: … · Backlog plannable now: … · Needs Plan/Frame: …".
