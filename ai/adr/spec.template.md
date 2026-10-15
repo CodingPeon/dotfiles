@@ -31,6 +31,9 @@ Write one row per functional requirement.
 - `Capability` is one observable sentence.
 - `Teams` names the teams that satisfy the row.
 - An `ID` is a stable token.
+- Write an `ID` as 2 to 4 uppercase words separated by hyphens.
+- State what the requirement is about in those words.
+- Do not use a serial number in an `ID`.
 
 ## Non-Functional Requirements
 
@@ -42,7 +45,7 @@ Write one row per non-functional requirement.
 
 - The columns are `ID` and `Constraint`.
 - `Constraint` is one sentence.
-- Apply the Catalog `ID` rule to each row.
+- Apply the Catalog `ID` rules to each row.
 
 ## Acceptance Criteria
 
@@ -54,26 +57,22 @@ Write one row per non-functional requirement.
 ### <ID>
 
 ```gherkin
-Feature: <Capability>
-
-  Scenario: <example name>
-    Given <precondition>
-    And <precondition>
-    When <action>
-    Then <observable result>
-    And <observable result>
-    # <note>
+Scenario: <example name>
+  Given <precondition>
+  And <precondition>
+  When <action>
+  Then <observable result>
+  And <observable result>
 ```
 
 - Open the fence with `gherkin` at column 0.
 - Leave a blank line before the opening fence and after the closing fence.
-- Put one `Feature:` in the fence.
-- Set `Feature:` to the `Capability` cell, or to the `Constraint` cell when the `ID` is non-functional.
+- Do not put a `Feature:` line in the fence. The Catalog row, or the Non-Functional Requirements row, already states it.
 - Add each example as a `Scenario:` in that same fence.
 - Start a step with `Given`, `When`, `Then`, `And`, or `But`, then a space and the step text.
-- Put a colon after `Feature` and after `Scenario`.
+- Put a colon after `Scenario`.
 - Put no colon after a step keyword.
-- Write a note as its own line whose first non-space character is `#`, then the note text. Omit the line when the scenario has no note.
+- Add a `#` line only when the user asks for a note. Write it as its own line whose first non-space character is `#`, then the note text.
 - A `#` line is not a step.
 - Do not use `Note` or `Subclause` as keywords.
 
